@@ -29,3 +29,14 @@ body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-
 
 /* ── Utility ── */
 .errorMessage { color: #ef4444; font-size: 0.75rem; }
+
+/* ── PrimeNG Toast Responsive Fix ── */
+@media screen and (max-width: 768px) {
+  .p-toast {
+    width: 90% !important;
+    left: 5% !important;
+    right: 5% !important;
+    margin: 0 auto;
+    transform: none !important;
+  }
+}
