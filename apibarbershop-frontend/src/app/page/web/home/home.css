@@ -610,25 +610,111 @@
 }
 
 /* ══ RESPONSIVE ══ */
+@media (max-width: 992px) {
+  .services-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+}
+
 @media (max-width: 768px) {
+  .navbar-inner {
+    padding: 0 1rem;
+    gap: 1rem;
+  }
+  
+  .navbar-logo {
+    font-size: 1.1rem;
+  }
+
   .navbar-links {
     display: none;
+  }
+
+  /* Hide labels in navbar buttons on small screens, keep only icons */
+  .navbar-actions ::ng-deep .p-button-label {
+    display: none !important;
+  }
+  
+  .navbar-actions ::ng-deep .p-button {
+    padding: 0.6rem !important;
+    width: 2.75rem;
+    height: 2.75rem;
+    justify-content: center;
+  }
+  
+  .navbar-actions ::ng-deep .p-button-icon {
+    margin: 0 !important;
+  }
+
+  .hero-content {
+    padding: 1.5rem 1rem;
+  }
+
+  .hero-title {
+    font-size: 2.25rem;
+    line-height: 1.15;
+  }
+
+  .hero-sub {
+    font-size: 1rem;
+    margin-bottom: 2rem;
   }
 
   .hero-btns {
     flex-direction: column;
     gap: 1rem;
+    width: 100%;
+  }
+
+  .hero-btns ::ng-deep .p-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .web-section {
+    padding: 3.5rem 1rem;
+  }
+
+  .section-head {
+    margin-bottom: 2rem;
   }
 
   .services-grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
   }
 
   .barbers-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1.25rem;
   }
 
   .gallery-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  .cta-section {
+    padding: 4rem 1rem;
+  }
+  
+  .cta-title {
+    font-size: 2rem;
+  }
+
+  .footer-inner {
+    gap: 1rem;
+  }
+
+  .footer-info {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .barbers-grid,
+  .gallery-grid {
+    grid-template-columns: 1fr;
   }
 }
