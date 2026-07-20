@@ -1,0 +1,255 @@
+<!-- ══ TOOLBAR ══ -->
+<p-toolbar styleClass="mb-4 toolbar-custom">
+  <ng-template #start>
+    <div class="page-header">
+      <h2 class="page-title">
+        <i class="pi pi-users mr-2"></i> Gestión de Usuarios
+      </h2>
+      <span class="page-subtitle">Administradores y Barberos del sistema</span>
+    </div>
+  </ng-template>
+  <ng-template #end>
+    <p-button
+      label="Nuevo Usuario"
+      icon="pi pi-user-plus"
+      (click)="openNew()"
+    />
+  </ng-template>
+</p-toolbar>
+
+<!-- ══ TABLA ══ -->
+<div class="section-card">
+  <p-table
+    [value]="listUser"
+    [loading]="loading"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[5, 10, 25]"
+    [globalFilterFields]="['firstName','surName','email','role']"
+    #dt
+    stripedRows
+    dataKey="idUser"
+  >
+    <ng-template #caption>
+      <div class="table-caption">
+        <span class="results-count">
+          {{ listUser.length }} usuario(s) en total
+        </span>
+        <div class="search-box">
+          <i class="pi pi-search search-icon"></i>
+          <input
+            pInputText
+            type="text"
+            [(ngModel)]="searchValue"
+            (input)="dt.filterGlobal(searchValue, 'contains')"
+            placeholder="Buscar usuario..."
+            class="search-input"
+          />
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #header>
+      <tr>
+        <th style="width:56px"></th>
+        <th pSortableColumn="firstName">
+          Nombre <p-sortIcon field="firstName" />
+        </th>
+        <th pSortableColumn="email">
+          Correo <p-sortIcon field="email" />
+        </th>
+        <th pSortableColumn="phone">
+          Teléfono <p-sortIcon field="phone" />
+        </th>
+        <th pSortableColumn="role">
+          Rol <p-sortIcon field="role" />
+        </th>
+        <th>Estado</th>
+        <th class="text-center" style="width:130px">Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-user>
+      <tr>
+        <td>
+          @if(user.photo) {
+            <p-avatar [image]="user.photo" shape="circle" size="large" />
+          } @else {
+            <p-avatar icon="pi pi-user" shape="circle" size="large"
+              [style]="{ 'background-color': '#e2e8f0', 'color': '#64748b' }"
+            />
+          }
+        </td>
+        <td>
+          <div class="user-name-cell">
+            <span class="user-fullname">{{ user.firstName }} {{ user.surName }}</span>
+          </div>
+        </td>
+        <td class="text-slate-500">{{ user.email }}</td>
+        <td class="text-slate-500">{{ user.phone }}</td>
+        <td>
+          <p-tag [value]="user.role" [severity]="getRoleSeverity(user.role)" />
+        </td>
+        <td>
+          <p-tag
+            [value]="user.status === 1 ? 'Activo' : 'Inactivo'"
+            [severity]="getStatusSeverity(user.status)"
+          />
+        </td>
+        <td>
+          <div class="flex gap-2 justify-center">
+            <p-button
+              icon="pi pi-pencil"
+              [rounded]="true"
+              [text]="true"
+              severity="info"
+              pTooltip="Editar"
+              (onClick)="openEdit(user)"
+            />
+            <p-button
+              icon="pi pi-trash"
+              [rounded]="true"
+              [text]="true"
+              severity="danger"
+              pTooltip="Eliminar"
+              (onClick)="confirmDelete($event, user)"
+            />
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="7" class="empty-row">
+          <i class="pi pi-users text-4xl text-slate-200 mb-3"></i>
+          <p class="text-slate-400">No hay usuarios registrados.</p>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- ══ DIALOG FORMULARIO ══ -->
+<p-dialog
+  [(visible)]="dialogVisible"
+  [modal]="true"
+  [style]="{ width: '600px', minHeight: '600px' }"
+  [draggable]="false"
+  [resizable]="false"
+  [header]="isEditing ? 'Editar Usuario' : 'Nuevo Usuario'"
+>
+  <form [formGroup]="frmUser">
+    <div class="form-grid">
+
+      <div class="form-field">
+        <label>Nombres *</label>
+        <input pInputText formControlName="firstName" placeholder="Ej: Carlos" class="w-full" />
+        @if(firstNameFb.touched && firstNameFb.hasError('required')) {
+          <small class="errorMessage">Campo requerido.</small>
+        }
+      </div>
+
+      <div class="form-field">
+        <label>Apellidos *</label>
+        <input pInputText formControlName="surName" placeholder="Ej: Quispe" class="w-full" />
+        @if(surNameFb.touched && surNameFb.hasError('required')) {
+          <small class="errorMessage">Campo requerido.</small>
+        }
+      </div>
+
+      <div class="form-field form-field--full">
+        <label>Correo electrónico *</label>
+        <input pInputText formControlName="email" type="email" placeholder="Ej: carlos@barbershop.com" class="w-full" />
+        @if(emailFb.touched && emailFb.hasError('required')) {
+          <small class="errorMessage">Campo requerido.</small>
+        }
+        @if(emailFb.touched && emailFb.hasError('email')) {
+          <small class="errorMessage">Ingrese un correo válido.</small>
+        }
+      </div>
+
+      <div class="form-field form-field--full">
+        <label>Teléfono *</label>
+        <input pInputText formControlName="phone" type="tel" placeholder="Ej: 987654321" class="w-full" />
+        @if(phoneFb.touched && phoneFb.hasError('required')) {
+          <small class="errorMessage">Campo requerido.</small>
+        }
+        @if(phoneFb.touched && phoneFb.hasError('pattern')) {
+          <small class="errorMessage">Solo se permiten números y el símbolo +.</small>
+        }
+        @if(phoneFb.touched && phoneFb.hasError('minlength')) {
+          <small class="errorMessage">Mínimo 7 dígitos.</small>
+        }
+      </div>
+
+      @if(!isEditing) {
+        <div class="form-field form-field--full">
+          <label>Contraseña *</label>
+          <p-password
+            formControlName="password"
+            [feedback]="true"
+            [toggleMask]="true"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+            placeholder="Mínimo 6 caracteres"
+          />
+          @if(passwordFb.touched && passwordFb.hasError('required')) {
+            <small class="errorMessage">Campo requerido.</small>
+          }
+          @if(passwordFb.touched && passwordFb.hasError('minlength')) {
+            <small class="errorMessage">Mínimo 6 caracteres.</small>
+          }
+        </div>
+      }
+
+      <div class="form-field form-field--full">
+        <label>Rol *</label>
+        <p-select
+          [options]="roleOptions"
+          formControlName="role"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Seleccione un rol"
+          appendTo="body"
+          class="w-full"
+        />
+        @if(roleFb.touched && roleFb.hasError('required')) {
+          <small class="errorMessage">Seleccione un rol.</small>
+        }
+      </div>
+
+      @if(isEditing) {
+        <div class="form-field form-field--full">
+          <label>Estado *</label>
+          <p-select
+            [options]="statusOptions"
+            formControlName="status"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Seleccione el estado"
+            appendTo="body"
+            class="w-full"
+          />
+        </div>
+      }
+
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <p-button
+      label="Cancelar"
+      icon="pi pi-times"
+      severity="secondary"
+      [outlined]="true"
+      (onClick)="dialogVisible = false"
+    />
+    <p-button
+      [label]="isEditing ? 'Guardar cambios' : 'Registrar'"
+      icon="pi pi-check"
+      [loading]="savingUser"
+      (onClick)="saveUser()"
+    />
+  </ng-template>
+</p-dialog>

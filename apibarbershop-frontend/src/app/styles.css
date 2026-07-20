@@ -1,0 +1,31 @@
+@import "primeicons/primeicons.css";
+@import "tailwindcss";
+
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* ── Global reset ── */
+* { box-sizing: border-box; }
+body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; }
+
+/* ── PrimeNG table override for admin ── */
+.p-datatable .p-datatable-thead > tr > th {
+  background: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+  color: #64748b;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.p-datatable .p-datatable-tbody > tr:hover {
+  background: #fafafa !important;
+}
+
+/* ── Utility ── */
+.errorMessage { color: #ef4444; font-size: 0.75rem; }

@@ -1,0 +1,334 @@
+<!-- NAVBAR mínima -->
+<header class="booking-navbar">
+  <div class="booking-navbar-inner">
+    <div class="booking-logo" (click)="goHome()" style="cursor:pointer">
+      <i class="pi pi-scissors"></i>
+      <span>BarberShop</span>
+    </div>
+    <p-button label="Volver al inicio" icon="pi pi-arrow-left" [text]="true" severity="secondary" (click)="goHome()" />
+  </div>
+</header>
+
+<div class="booking-page">
+  <div class="booking-container">
+
+    <!-- Título -->
+    <div class="booking-header">
+      <h1 class="booking-title">Reserva tu Cita</h1>
+      <p class="booking-sub">Completa los pasos para asegurar tu lugar</p>
+    </div>
+
+    <!-- ══ STEPPER ══ -->
+    <p-stepper [(value)]="activeStep" [linear]="true">
+
+      <!-- ── PASO 1: Tus datos ── -->
+      <p-step-panel header="Tus datos" [value]="0">
+        <ng-template #content>
+          <div class="step-content">
+            <div class="step-section-title">
+              <i class="pi pi-user text-blue-500"></i>
+              Ingresa tus datos de contacto
+            </div>
+
+            <form [formGroup]="frmCustomer">
+              <div class="form-grid">
+
+                <div class="form-field">
+                  <label>Nombres *</label>
+                  <input pInputText formControlName="firstName" placeholder="Ej: Juan" class="w-full" />
+                  @if(firstNameFb.touched && firstNameFb.hasError('required')) {
+                    <small class="errorMessage">Campo requerido.</small>
+                  }
+                </div>
+
+                <div class="form-field">
+                  <label>Apellidos *</label>
+                  <input pInputText formControlName="surName" placeholder="Ej: Condori" class="w-full" />
+                  @if(surNameFb.touched && surNameFb.hasError('required')) {
+                    <small class="errorMessage">Campo requerido.</small>
+                  }
+                </div>
+
+                <div class="form-field">
+                  <label>Teléfono / Celular *</label>
+                  <input pInputText formControlName="phone" placeholder="Ej: 987654321" class="w-full" />
+                  @if(phoneFb.touched && phoneFb.hasError('required')) {
+                    <small class="errorMessage">Campo requerido.</small>
+                  }
+                  @if(phoneFb.touched && phoneFb.hasError('pattern')) {
+                    <small class="errorMessage">Solo números, mínimo 7 dígitos.</small>
+                  }
+                </div>
+
+                <div class="form-field">
+                  <label>Correo electrónico <span class="optional-label">(opcional)</span></label>
+                  <input pInputText formControlName="email" placeholder="Ej: juan@gmail.com" class="w-full" />
+                  @if(emailFb.touched && emailFb.hasError('email')) {
+                    <small class="errorMessage">Ingrese un correo válido.</small>
+                  }
+                </div>
+
+              </div>
+            </form>
+
+            <div class="step-footer">
+              <p-button label="Continuar" icon="pi pi-arrow-right" iconPos="right" (click)="goToStep2()" />
+            </div>
+          </div>
+        </ng-template>
+      </p-step-panel>
+
+      <!-- ── PASO 2: Servicios ── -->
+      <p-step-panel header="Servicios" [value]="1">
+        <ng-template #content>
+          <div class="step-content">
+            <div class="step-section-title">
+              <i class="pi pi-tag text-purple-500"></i>
+              Selecciona los servicios que deseas
+            </div>
+            <p class="step-section-hint">
+              ¿No sabes exactamente qué servicio necesitas? Puedes omitir esta selección y enviarnos una imagen de referencia del corte o estilo que quieres.
+            </p>
+
+            @if(loading) {
+              <p class="text-center text-slate-400 py-8">Cargando servicios...</p>
+            } @else {
+              <div class="services-select-grid" [class.disabled-block]="hasReferenceImage">
+                @for(service of services; track service.idService) {
+                  <div
+                    class="service-select-card"
+                    [class.selected]="isServiceSelected(service)"
+                    (click)="toggleService(service)"
+                  >
+                    <div class="service-select-check">
+                      <i class="pi" [class.pi-check-circle]="isServiceSelected(service)" [class.pi-circle]="!isServiceSelected(service)"></i>
+                    </div>
+                    @if(service.image) {
+                      <img [src]="service.image" [alt]="service.name" class="service-select-img" />
+                    } @else {
+                      <div class="service-select-img-placeholder">
+                        <i class="pi pi-scissors text-3xl text-slate-300"></i>
+                      </div>
+                    }
+                    <div class="service-select-body">
+                      <h4>{{ service.name }}</h4>
+                      <p>{{ service.description }}</p>
+                      <div class="service-select-meta">
+                        <strong>S/ {{ service.price | number:'1.2-2' }}</strong>
+                        <span><i class="pi pi-clock"></i> {{ service.durationMinutes }} min</span>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Resumen selección -->
+              @if(selectedServices.length > 0) {
+                <div class="selection-summary">
+                  <div class="summary-row">
+                    <span>{{ selectedServices.length }} servicio(s) seleccionado(s)</span>
+                    <span class="summary-total">Total: S/ {{ totalPrice | number:'1.2-2' }} · {{ totalMinutes }} min</span>
+                  </div>
+                </div>
+              }
+
+              <!-- ── Alternativa: imagen de referencia ── -->
+              <div class="reference-divider">
+                <span>o</span>
+              </div>
+
+              <div class="reference-image-box" [class.disabled-block]="selectedServices.length > 0">
+                <div class="reference-image-title">
+                  <i class="pi pi-image text-blue-500"></i>
+                  Envía una imagen de referencia del corte/estilo
+                </div>
+
+                @if(!referenceImagePreview) {
+                  <label class="reference-image-dropzone" for="referenceImageInput">
+                    <i class="pi pi-cloud-upload text-3xl text-slate-400"></i>
+                    <span>Haz clic para elegir una imagen</span>
+                    <small>JPG, PNG, WEBP o GIF · máx. 5MB</small>
+                  </label>
+                  <input
+                    id="referenceImageInput"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    class="reference-image-input"
+                    [disabled]="selectedServices.length > 0"
+                    (change)="onReferenceImageSelected($event)"
+                  />
+                } @else {
+                  <div class="reference-image-preview">
+                    <img [src]="referenceImagePreview" alt="Referencia seleccionada" />
+                    <button type="button" class="reference-image-remove" (click)="removeReferenceImage()">
+                      <i class="pi pi-times"></i> Quitar imagen
+                    </button>
+                  </div>
+                }
+
+                @if(referenceImageError) {
+                  <small class="errorMessage">{{ referenceImageError }}</small>
+                }
+              </div>
+            }
+
+            <div class="step-footer">
+              <p-button label="Atrás" icon="pi pi-arrow-left" severity="secondary" [outlined]="true" (click)="activeStep = 0" />
+              <p-button label="Continuar" icon="pi pi-arrow-right" iconPos="right" (click)="goToStep3()" />
+            </div>
+          </div>
+        </ng-template>
+      </p-step-panel>
+
+      <!-- ── PASO 3: Barbero y horario ── -->
+      <p-step-panel header="Horario" [value]="2">
+        <ng-template #content>
+          <div class="step-content">
+            <div class="step-section-title">
+              <i class="pi pi-calendar text-orange-500"></i>
+              Elige tu barbero, fecha y hora
+            </div>
+
+            <form [formGroup]="frmAppointment">
+              <div class="form-grid">
+
+                <div class="form-field form-field--full">
+                  <label>Barbero *</label>
+                  <p-select
+                    [options]="barbers"
+                    formControlName="barber"
+                    optionLabel="firstName"
+                    placeholder="Selecciona un barbero"
+                    class="w-full"
+                  >
+                    <ng-template #selectedItem let-barber>
+                      <span>{{ barber.firstName }} {{ barber.surName }}</span>
+                    </ng-template>
+                    <ng-template #item let-barber>
+                      <span>{{ barber.firstName }} {{ barber.surName }}</span>
+                    </ng-template>
+                  </p-select>
+                  @if(barberFb.touched && barberFb.hasError('required')) {
+                    <small class="errorMessage">Seleccione un barbero.</small>
+                  }
+                </div>
+
+                <div class="form-field">
+                  <label>Fecha *</label>
+                  <p-datepicker
+                    formControlName="date"
+                    [minDate]="minDate"
+                    dateFormat="yy-mm-dd"
+                    placeholder="Selecciona la fecha"
+                    class="w-full"
+                  />
+                  @if(dateFb.touched && dateFb.hasError('required')) {
+                    <small class="errorMessage">Seleccione una fecha.</small>
+                  }
+                </div>
+
+                <div class="form-field">
+                  <label>Hora de inicio *</label>
+                  <p-select
+                    [options]="availableHours"
+                    formControlName="startHour"
+                    placeholder="Seleccione la hora"
+                    class="w-full"
+                    [loading]="loadingHours"
+                    [disabled]="!barberFb.value || !dateFb.value || availableHours.length === 0"
+                  >
+                  </p-select>
+                  @if(startHourFb.touched && startHourFb.hasError('required')) {
+                    <small class="errorMessage">Seleccione una hora disponible.</small>
+                  }
+                  @if(!loadingHours && barberFb.value && dateFb.value && availableHours.length === 0) {
+                    <small class="errorMessage">No hay horas disponibles en esta fecha.</small>
+                  }
+                </div>
+
+                <div class="form-field form-field--full">
+                  <label>Observaciones <span class="optional-label">(opcional)</span></label>
+                  <textarea pTextarea formControlName="observation" rows="3" placeholder="Ej: Quiero degradado alto con diseño en la sien..." class="w-full"></textarea>
+                </div>
+
+              </div>
+            </form>
+
+            <!-- Resumen final -->
+            @if(selectedServices.length > 0) {
+              <div class="booking-summary">
+                <h4 class="summary-title">Resumen de tu reserva</h4>
+                <div class="summary-services">
+                  @for(s of selectedServices; track s.idService) {
+                    <div class="summary-service-row">
+                      <span>{{ s.name }}</span>
+                      <span>S/ {{ s.price | number:'1.2-2' }}</span>
+                    </div>
+                  }
+                </div>
+                <p-divider />
+                <div class="summary-service-row summary-total-row">
+                  <strong>Total</strong>
+                  <strong>S/ {{ totalPrice | number:'1.2-2' }}</strong>
+                </div>
+                <div class="summary-service-row">
+                  <span class="text-slate-400 text-sm">Duración estimada</span>
+                  <span class="text-slate-400 text-sm">{{ totalMinutes }} minutos</span>
+                </div>
+              </div>
+            } @else if(hasReferenceImage) {
+              <div class="booking-summary">
+                <h4 class="summary-title">Resumen de tu reserva</h4>
+                <div class="summary-service-row">
+                  <span><i class="pi pi-image text-blue-500"></i> Servicio a definir según imagen de referencia</span>
+                </div>
+                <img [src]="referenceImagePreview" alt="Referencia seleccionada" class="summary-reference-img" />
+              </div>
+            }
+
+            <div class="step-footer">
+              <p-button label="Atrás" icon="pi pi-arrow-left" severity="secondary" [outlined]="true" (click)="activeStep = 1" />
+              <p-button
+                label="Confirmar Reserva"
+                icon="pi pi-check"
+                (click)="sendBooking()"
+                [loading]="sendingCustomer || sendingAppointment || uploadingImage"
+              />
+            </div>
+          </div>
+        </ng-template>
+      </p-step-panel>
+
+      <!-- ── PASO 4: Confirmación ── -->
+      <p-step-panel header="Confirmación" [value]="3">
+        <ng-template #content>
+          <div class="step-content success-step">
+            <div class="success-icon">
+              <i class="pi pi-check-circle"></i>
+            </div>
+            <h2 class="success-title">¡Reserva realizada!</h2>
+            <p class="success-sub">Tu cita ha sido registrada exitosamente. Te esperamos pronto.</p>
+
+            <div class="success-details">
+              @for(s of selectedServices; track s.idService) {
+                <p-tag [value]="s.name" severity="success" class="m-1" />
+              }
+              @if(selectedServices.length === 0 && hasReferenceImage) {
+                <p-tag value="Servicio a definir según imagen de referencia" severity="info" class="m-1" />
+              }
+            </div>
+
+            <p class="success-note">
+              <i class="pi pi-info-circle"></i>
+              Llega 5 minutos antes de tu cita. Ante cualquier cambio, contáctanos.
+            </p>
+
+            <p-button label="Volver al inicio" icon="pi pi-home" (click)="goHome()" />
+          </div>
+        </ng-template>
+      </p-step-panel>
+
+    </p-stepper>
+
+  </div>
+</div>

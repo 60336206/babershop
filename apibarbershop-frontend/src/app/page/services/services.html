@@ -1,0 +1,235 @@
+<!-- ══ TOOLBAR ══ -->
+<p-toolbar styleClass="mb-4 toolbar-custom">
+  <ng-template #start>
+    <div class="page-header">
+      <h2 class="page-title">
+        <i class="pi pi-tag mr-2"></i> Gestión de Servicios
+      </h2>
+      <span class="page-subtitle">Catálogo de servicios de la barbería</span>
+    </div>
+  </ng-template>
+  <ng-template #end>
+    <p-button label="Nuevo Servicio" icon="pi pi-plus" (click)="openNew()" />
+  </ng-template>
+</p-toolbar>
+
+<!-- ══ VISTA CARDS ══ -->
+@if(loading) {
+  <div class="services-grid">
+    @for(i of [1,2,3,4,5,6]; track i) {
+      <div class="service-card service-card--skeleton">
+        <p-skeleton height="160px" />
+        <div class="service-card-body">
+          <p-skeleton width="70%" height="1.1rem" class="mb-2" />
+          <p-skeleton width="100%" height="0.8rem" class="mb-1" />
+          <p-skeleton width="80%" height="0.8rem" />
+        </div>
+      </div>
+    }
+  </div>
+
+} @else if(listService.length === 0) {
+  <div class="empty-state">
+    <i class="pi pi-tag text-5xl text-slate-200 mb-4"></i>
+    <h3 class="text-slate-500 font-semibold">Sin servicios registrados</h3>
+    <p class="text-slate-400 text-sm mb-4">Agrega el primer servicio para comenzar.</p>
+    <p-button label="Nuevo Servicio" icon="pi pi-plus" (click)="openNew()" />
+  </div>
+
+} @else {
+  <div class="services-grid">
+    @for(service of listService; track service.idService) {
+      <div class="service-card">
+
+        <!-- Imagen -->
+        @if(service.image) {
+          <img [src]="service.image" [alt]="service.name" class="service-card-img" />
+        } @else {
+          <div class="service-card-img-placeholder">
+            <i class="pi pi-scissors text-4xl text-slate-300"></i>
+          </div>
+        }
+
+        <!-- Badge estado -->
+        <div class="service-card-status">
+          <p-tag
+            [value]="service.status === 1 ? 'Activo' : 'Inactivo'"
+            [severity]="getStatusSeverity(service.status)"
+          />
+        </div>
+
+        <!-- Cuerpo -->
+        <div class="service-card-body">
+          <h3 class="service-name">{{ service.name }}</h3>
+          <p class="service-desc">{{ service.description }}</p>
+
+          <div class="service-meta">
+            <div class="service-price">
+              <span class="price-label">Precio</span>
+              <span class="price-value">S/ {{ service.price | number:'1.2-2' }}</span>
+            </div>
+            <div class="service-duration">
+              <i class="pi pi-clock"></i>
+              <span>{{ service.durationMinutes }} min</span>
+            </div>
+          </div>
+
+          <div class="service-actions">
+            <p-button
+              label="Editar"
+              icon="pi pi-pencil"
+              severity="secondary"
+              [outlined]="true"
+              size="small"
+              (onClick)="openEdit(service)"
+              styleClass="flex-1"
+            />
+            <p-button
+              icon="pi pi-trash"
+              severity="danger"
+              [outlined]="true"
+              size="small"
+              pTooltip="Eliminar"
+              (onClick)="confirmDelete($event, service)"
+            />
+          </div>
+        </div>
+
+      </div>
+    }
+  </div>
+}
+
+<!-- ══ DIALOG ══ -->
+<p-dialog
+  [(visible)]="dialogVisible"
+  [modal]="true"
+  [style]="{ width: '520px' }"
+  [draggable]="false"
+  [resizable]="false"
+  [header]="isEditing ? 'Editar Servicio' : 'Nuevo Servicio'"
+>
+  <form [formGroup]="frmService">
+    <div class="form-grid">
+
+      <div class="form-field form-field--full">
+        <label>Nombre del servicio *</label>
+        <input pInputText formControlName="name" placeholder="Ej: Corte clásico" class="w-full" />
+        @if(nameFb.touched && nameFb.hasError('required')) {
+          <small class="errorMessage">Campo requerido.</small>
+        }
+      </div>
+
+      <div class="form-field form-field--full">
+        <label>Descripción *</label>
+        <textarea
+          pTextarea
+          formControlName="description"
+          rows="3"
+          placeholder="Describe el servicio..."
+          class="w-full"
+        ></textarea>
+        @if(descriptionFb.touched && descriptionFb.hasError('required')) {
+          <small class="errorMessage">Campo requerido.</small>
+        }
+      </div>
+
+      <div class="form-field">
+        <label>Precio (S/) *</label>
+        <p-inputNumber
+          formControlName="price"
+          [min]="0"
+          [minFractionDigits]="2"
+          [maxFractionDigits]="2"
+          placeholder="0.00"
+          styleClass="w-full"
+          inputStyleClass="w-full"
+        />
+        @if(priceFb.touched && priceFb.hasError('required')) {
+          <small class="errorMessage">Campo requerido.</small>
+        }
+        @if(priceFb.touched && priceFb.hasError('min')) {
+          <small class="errorMessage">El precio debe ser mayor a 0.</small>
+        }
+      </div>
+
+      <div class="form-field">
+        <label>Duración (minutos) *</label>
+        <p-inputNumber
+          formControlName="durationMinutes"
+          [min]="1"
+          [max]="240"
+          placeholder="30"
+          suffix=" min"
+          styleClass="w-full"
+          inputStyleClass="w-full"
+        />
+        @if(durationMinutesFb.touched && durationMinutesFb.hasError('required')) {
+          <small class="errorMessage">Campo requerido.</small>
+        }
+        @if(durationMinutesFb.touched && durationMinutesFb.hasError('min')) {
+          <small class="errorMessage">La duración debe ser mayor a 0.</small>
+        }
+      </div>
+
+      <div class="form-field form-field--full">
+        <label>Imagen del servicio <span class="optional-label">(opcional)</span></label>
+
+        <div class="image-upload">
+          @if(imagePreview) {
+            <div class="image-upload-preview">
+              <img [src]="imagePreview" alt="Vista previa" />
+              <button type="button" class="image-upload-remove" (click)="removeImage()" pTooltip="Quitar imagen">
+                <i class="pi pi-times"></i>
+              </button>
+            </div>
+          } @else {
+            <label class="image-upload-dropzone" for="serviceImageInput">
+              <i class="pi pi-image text-3xl text-slate-300"></i>
+              <span>Haz clic para seleccionar una imagen</span>
+              <span class="image-upload-hint">JPG, PNG o WEBP · máx. 3 MB</span>
+            </label>
+          }
+
+          <input
+            id="serviceImageInput"
+            type="file"
+            accept="image/*"
+            (change)="onImageSelected($event)"
+            [hidden]="!!imagePreview"
+          />
+
+          @if(imagePreview) {
+            <label for="serviceImageInput" class="image-upload-change">
+              <i class="pi pi-refresh mr-1"></i> Cambiar imagen
+            </label>
+          }
+        </div>
+
+        @if(imageError) {
+          <small class="errorMessage">{{ imageError }}</small>
+        }
+      </div>
+
+      @if(isEditing) {
+        <div class="form-field form-field--full">
+          <label>Estado *</label>
+          <p-select
+            [options]="statusOptions"
+            formControlName="status"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Seleccione el estado"
+            class="w-full"
+          />
+        </div>
+      }
+
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <p-button label="Cancelar" icon="pi pi-times" severity="secondary" [outlined]="true" (onClick)="dialogVisible = false" />
+    <p-button [label]="isEditing ? 'Guardar cambios' : 'Registrar'" icon="pi pi-check" [loading]="saving" (onClick)="saveService()" />
+  </ng-template>
+</p-dialog>

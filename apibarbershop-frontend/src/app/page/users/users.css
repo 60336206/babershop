@@ -1,0 +1,113 @@
+/* ── Toolbar ── */
+.toolbar-custom {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+}
+
+.page-header { display: flex; flex-direction: column; gap: 0.15rem; }
+
+.page-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.page-subtitle { font-size: 0.8rem; color: #64748b; margin: 0; }
+
+/* ── Section Card ── */
+.section-card {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* ── Table Caption ── */
+.table-caption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  gap: 1rem;
+}
+
+.results-count { font-size: 0.8rem; color: #64748b; font-weight: 500; }
+
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  color: #94a3b8;
+  font-size: 0.875rem;
+  pointer-events: none;
+}
+
+.search-input {
+  padding-left: 2.25rem !important;
+  height: 36px;
+  font-size: 0.875rem;
+  width: 220px;
+  border-radius: 8px;
+}
+
+/* ── User Cell ── */
+.user-name-cell { display: flex; flex-direction: column; }
+
+.user-fullname {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* ── Empty Row ── */
+.empty-row {
+  text-align: center;
+  padding: 4rem !important;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Form ── */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  padding: 0.5rem 0;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-field--full { grid-column: 1 / -1; }
+
+.form-field label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+/* ── Error ── */
+.errorMessage { color: #ef4444; font-size: 0.75rem; }
+
+@media (max-width: 640px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .form-field--full { grid-column: 1; }
+  .search-input { width: 160px; }
+  .table-caption { flex-direction: column; align-items: flex-start; }
+}

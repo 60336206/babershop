@@ -1,0 +1,168 @@
+<!-- ══ TOOLBAR ══ -->
+<p-toolbar styleClass="mb-4 toolbar-custom">
+  <ng-template #start>
+    <div class="page-header">
+      <h2 class="page-title">
+        <i class="pi pi-id-card mr-2"></i> Gestión de Clientes
+      </h2>
+      <span class="page-subtitle">Clientes registrados en el sistema</span>
+    </div>
+  </ng-template>
+  <ng-template #end>
+    <p-button label="Nuevo Cliente" icon="pi pi-user-plus" (click)="openNew()" />
+  </ng-template>
+</p-toolbar>
+
+<!-- ══ TABLA ══ -->
+<div class="section-card">
+  <p-table
+    [value]="listCustomer"
+    [loading]="loading"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[5,10,25,50]"
+    [globalFilterFields]="['firstName','surName','phone','email']"
+    #dt
+    stripedRows
+    dataKey="idCustomer"
+  >
+    <ng-template #caption>
+      <div class="table-caption">
+        <span class="results-count">{{ listCustomer.length }} cliente(s)</span>
+        <div class="search-box">
+          <i class="pi pi-search search-icon"></i>
+          <input
+            pInputText
+            [(ngModel)]="searchValue"
+            (input)="dt.filterGlobal(searchValue, 'contains')"
+            placeholder="Buscar cliente..."
+            class="search-input"
+          />
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template #header>
+      <tr>
+        <th pSortableColumn="firstName">Nombre <p-sortIcon field="firstName" /></th>
+        <th pSortableColumn="phone">Teléfono <p-sortIcon field="phone" /></th>
+        <th>Correo</th>
+        <th>Estado</th>
+        <th class="text-center" style="width:130px">Acciones</th>
+      </tr>
+    </ng-template>
+
+    <ng-template #body let-customer>
+      <tr>
+        <td>
+          <div class="customer-name-cell">
+            <div class="customer-avatar">
+              {{ customer.firstName.charAt(0).toUpperCase() }}{{ customer.surName.charAt(0).toUpperCase() }}
+            </div>
+            <div>
+              <span class="customer-fullname">{{ customer.firstName }} {{ customer.surName }}</span>
+            </div>
+          </div>
+        </td>
+        <td>
+          <span class="flex items-center gap-1 text-slate-600">
+            <i class="pi pi-phone text-xs"></i>
+            {{ customer.phone }}
+          </span>
+        </td>
+        <td class="text-slate-500 text-sm">{{ customer.email || '—' }}</td>
+        <td>
+          <p-tag
+            [value]="customer.status === 1 ? 'Activo' : 'Inactivo'"
+            [severity]="getStatusSeverity(customer.status)"
+          />
+        </td>
+        <td>
+          <div class="flex gap-2 justify-center">
+            <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="info" pTooltip="Editar" (onClick)="openEdit(customer)" />
+            <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" pTooltip="Eliminar" (onClick)="confirmDelete($event, customer)" />
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template #emptymessage>
+      <tr>
+        <td colspan="5" class="empty-row">
+          <i class="pi pi-id-card text-4xl text-slate-200 mb-3"></i>
+          <p class="text-slate-400">No hay clientes registrados.</p>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<!-- ══ DIALOG ══ -->
+<p-dialog
+  [(visible)]="dialogVisible"
+  [modal]="true"
+  [style]="{ width: '480px' }"
+  [draggable]="false"
+  [resizable]="false"
+  [header]="isEditing ? 'Editar Cliente' : 'Nuevo Cliente'"
+>
+  <form [formGroup]="frmCustomer">
+    <div class="form-grid">
+
+      <div class="form-field">
+        <label>Nombres *</label>
+        <input pInputText formControlName="firstName" placeholder="Ej: María" class="w-full" />
+        @if(firstNameFb.touched && firstNameFb.hasError('required')) {
+          <small class="errorMessage">Campo requerido.</small>
+        }
+      </div>
+
+      <div class="form-field">
+        <label>Apellidos *</label>
+        <input pInputText formControlName="surName" placeholder="Ej: Mamani" class="w-full" />
+        @if(surNameFb.touched && surNameFb.hasError('required')) {
+          <small class="errorMessage">Campo requerido.</small>
+        }
+      </div>
+
+      <div class="form-field form-field--full">
+        <label>Teléfono / Celular *</label>
+        <input pInputText formControlName="phone" placeholder="Ej: 987654321" class="w-full" />
+        @if(phoneFb.touched && phoneFb.hasError('required')) {
+          <small class="errorMessage">Campo requerido.</small>
+        }
+        @if(phoneFb.touched && phoneFb.hasError('pattern')) {
+          <small class="errorMessage">Solo números, mínimo 7 dígitos.</small>
+        }
+      </div>
+
+      <div class="form-field form-field--full">
+        <label>Correo electrónico <span class="optional-label">(opcional)</span></label>
+        <input pInputText formControlName="email" type="email" placeholder="Ej: maria@gmail.com" class="w-full" />
+        @if(emailFb.touched && emailFb.hasError('email')) {
+          <small class="errorMessage">Ingrese un correo válido.</small>
+        }
+      </div>
+
+      @if(isEditing) {
+        <div class="form-field form-field--full">
+          <label>Estado *</label>
+          <p-select
+            [options]="statusOptions"
+            formControlName="status"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Seleccione el estado"
+            class="w-full"
+          />
+        </div>
+      }
+
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <p-button label="Cancelar" icon="pi pi-times" severity="secondary" [outlined]="true" (onClick)="dialogVisible = false" />
+    <p-button [label]="isEditing ? 'Guardar cambios' : 'Registrar'" icon="pi pi-check" [loading]="saving" (onClick)="saveCustomer()" />
+  </ng-template>
+</p-dialog>

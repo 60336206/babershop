@@ -1,0 +1,102 @@
+<p-toolbar styleClass="mb-4 toolbar-custom">
+  <ng-template #start>
+    <div class="page-header">
+      <h2 class="page-title"><i class="pi pi-images mr-2"></i> Galería de Trabajos</h2>
+      <span class="page-subtitle">Administra las fotos de los cortes realizados</span>
+    </div>
+  </ng-template>
+  <ng-template #end>
+    <p-button label="Nueva Imagen" icon="pi pi-plus" (onClick)="openNew()" />
+  </ng-template>
+</p-toolbar>
+
+@if(loading) {
+  <div class="loading-state">
+    <i class="pi pi-spin pi-spinner text-3xl text-slate-400"></i>
+    <p class="text-slate-400 mt-2">Cargando galería...</p>
+  </div>
+} @else if(listGallery.length === 0) {
+  <div class="empty-state">
+    <i class="pi pi-images text-5xl text-slate-200 mb-4"></i>
+    <h3 class="text-slate-500 font-semibold">Sin imágenes en la galería</h3>
+    <p class="text-slate-400 text-sm mb-4">Sube las mejores fotos de tus trabajos.</p>
+    <p-button label="Subir primera imagen" icon="pi pi-upload" (onClick)="openNew()" />
+  </div>
+} @else {
+  <div class="masonry-grid">
+    @for(item of listGallery; track item.idGallery) {
+      <div class="gallery-card">
+        <img [src]="item.image" [alt]="item.title" class="gallery-img" />
+        <div class="gallery-overlay">
+          <div class="gallery-info">
+            <h3 class="gallery-title">{{ item.title }}</h3>
+            @if(item.description) {
+              <p class="gallery-desc">{{ item.description }}</p>
+            }
+          </div>
+          <div class="gallery-actions">
+            <button class="gal-btn gal-btn--edit" (click)="openEdit(item)" title="Editar">
+              <i class="pi pi-pencil"></i>
+            </button>
+            <button class="gal-btn gal-btn--del" (click)="confirmDelete($event, item)" title="Eliminar">
+              <i class="pi pi-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+}
+
+<!-- Dialog -->
+<p-dialog
+  [(visible)]="dialogVisible"
+  [modal]="true"
+  [style]="{ width: '500px' }"
+  [draggable]="false"
+  [resizable]="false"
+  [header]="isEditing ? 'Editar Imagen' : 'Nueva Imagen'"
+>
+  <!-- Upload area -->
+  <div class="upload-zone mb-4">
+    @if(uploadedImageBase64) {
+      <div class="preview-wrap">
+        <img [src]="uploadedImageBase64" alt="Preview" class="preview-img" />
+        <button class="preview-remove" (click)="removeImage()" title="Quitar">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+      <label for="galleryImg" class="change-img-btn">
+        <i class="pi pi-refresh mr-1"></i> Cambiar imagen
+      </label>
+    } @else {
+      <label for="galleryImg" class="upload-dropzone">
+        <i class="pi pi-image text-3xl text-slate-300"></i>
+        <span class="text-slate-500 font-medium text-sm">Clic para seleccionar imagen</span>
+        <span class="text-slate-400 text-xs">JPG, PNG, WEBP · máx. 3 MB</span>
+      </label>
+    }
+    <input id="galleryImg" type="file" accept="image/*" [hidden]="true" (change)="onImageSelect($event)" />
+  </div>
+
+  <form [formGroup]="frmGallery">
+    <div class="form-grid">
+      <div class="form-field form-field--full">
+        <label>Título *</label>
+        <input pInputText formControlName="title" placeholder="Ej: Fade Clásico" class="w-full" />
+        @if(titleFb.touched && titleFb.hasError('required')) {
+          <small class="errorMessage">Campo requerido.</small>
+        }
+      </div>
+      <div class="form-field form-field--full">
+        <label>Descripción <span class="text-slate-400 text-xs">(opcional)</span></label>
+        <textarea pTextarea formControlName="description" rows="2" placeholder="Detalles del corte..." class="w-full"></textarea>
+      </div>
+    </div>
+  </form>
+
+  <ng-template #footer>
+    <p-button label="Cancelar" severity="secondary" [outlined]="true" (onClick)="dialogVisible = false" />
+    <p-button [label]="isEditing ? 'Guardar Cambios' : 'Subir Imagen'" icon="pi pi-check" [loading]="saving" (onClick)="saveGallery()" />
+  </ng-template>
+</p-dialog>

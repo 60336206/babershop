@@ -1,0 +1,122 @@
+<p-toolbar styleClass="mb-4 toolbar-custom">
+  <ng-template #start>
+    <div class="page-header">
+      <h2 class="page-title"><i class="pi pi-clock mr-2"></i> Horarios de Atención</h2>
+      <span class="page-subtitle">Disponibilidad semanal de los barberos</span>
+    </div>
+  </ng-template>
+  <ng-template #end>
+    <div class="flex items-center gap-3">
+      <p-select
+        [options]="listBarbers"
+        [(ngModel)]="selectedBarberId"
+        optionLabel="firstName"
+        optionValue="idUser"
+        (onChange)="onBarberChange($event.value)"
+        placeholder="Seleccione un barbero"
+        [loading]="loadingBarbers"
+        [disabled]="listBarbers.length <= 1"
+        styleClass="w-56"
+      />
+    </div>
+  </ng-template>
+</p-toolbar>
+
+@if(loadingSchedules) {
+  <div class="loading-state">
+    <i class="pi pi-spin pi-spinner text-3xl text-slate-400"></i>
+    <p class="text-slate-400 mt-2">Cargando horarios...</p>
+  </div>
+} @else if(listBarbers.length === 0) {
+  <div class="empty-state">
+    <i class="pi pi-users text-5xl text-slate-200 mb-3"></i>
+    <h3 class="text-slate-500 font-semibold">Sin barberos disponibles</h3>
+    <p class="text-slate-400 text-sm">Registre usuarios con el rol Barbero para gestionar horarios.</p>
+  </div>
+} @else {
+  <div class="week-grid">
+    @for(day of weeklySchedule; track day.dayName) {
+      <div class="day-card" [class.day-card--active]="day.schedule">
+        <div class="day-card-header">
+          <span class="day-name">{{ day.dayName }}</span>
+          @if(day.schedule) {
+            <span class="day-badge day-badge--active">Activo</span>
+          } @else {
+            <span class="day-badge day-badge--off">Libre</span>
+          }
+        </div>
+
+        <div class="day-card-body">
+          @if(day.schedule) {
+            <div class="time-block">
+              <div class="time-item">
+                <span class="time-label">Entrada</span>
+                <span class="time-value">{{ formatHour12(day.schedule.startHour) }}</span>
+              </div>
+              <div class="time-divider">
+                <i class="pi pi-arrow-right text-slate-300"></i>
+              </div>
+              <div class="time-item">
+                <span class="time-label">Salida</span>
+                <span class="time-value">{{ formatHour12(day.schedule.endHour) }}</span>
+              </div>
+            </div>
+          } @else {
+            <div class="day-off-content">
+              <i class="pi pi-moon text-2xl text-slate-200"></i>
+              <span class="text-slate-300 text-sm">Día de descanso</span>
+            </div>
+          }
+        </div>
+
+        <div class="day-card-footer">
+          @if(day.schedule) {
+            <button class="day-action-btn day-action-btn--edit" (click)="openEdit(day.schedule)">
+              <i class="pi pi-pencil"></i> Editar
+            </button>
+            <button class="day-action-btn day-action-btn--del" (click)="confirmDelete($event, day.schedule)">
+              <i class="pi pi-trash"></i>
+            </button>
+          } @else {
+            <button class="day-action-btn day-action-btn--add" (click)="openAdd(day.dayName)">
+              <i class="pi pi-plus"></i> Agregar
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+}
+
+<!-- Dialog -->
+<p-dialog
+  [(visible)]="dialogVisible"
+  [modal]="true"
+  [style]="{width:'420px'}"
+  [draggable]="false"
+  [resizable]="false"
+  [header]="(isEditing ? 'Editar' : 'Nuevo') + ' Horario — ' + frmSchedule.value.dayName"
+>
+  <form [formGroup]="frmSchedule">
+    <div class="form-grid">
+      <div class="form-field">
+        <label>Hora inicio *</label>
+        <input type="time" pInputText formControlName="startHour" class="w-full font-mono" />
+        @if(startHourFb.touched && startHourFb.hasError('required')) {
+          <small class="errorMessage">Requerido.</small>
+        }
+      </div>
+      <div class="form-field">
+        <label>Hora fin *</label>
+        <input type="time" pInputText formControlName="endHour" class="w-full font-mono" />
+        @if(endHourFb.touched && endHourFb.hasError('required')) {
+          <small class="errorMessage">Requerido.</small>
+        }
+      </div>
+    </div>
+  </form>
+  <ng-template #footer>
+    <p-button label="Cancelar" severity="secondary" [outlined]="true" (onClick)="dialogVisible = false" />
+    <p-button label="Guardar" icon="pi pi-check" [loading]="saving" (onClick)="saveSchedule()" />
+  </ng-template>
+</p-dialog>

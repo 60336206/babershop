@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/environments/environments.ts"],
+  "sourcesContent": ["export const environment = {\n  production: false,\n  urlBase: 'http://localhost:8080'\n};\n"],
+  "mappings": ";AAAO,IAAM,cAAc;EACzB,YAAY;EACZ,SAAS;;",
+  "names": []
+}

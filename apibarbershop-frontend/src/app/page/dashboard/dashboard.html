@@ -1,0 +1,131 @@
+<div class="dashboard-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Dashboard</h1>
+      <p class="page-subtitle">{{ todayStr | titlecase }}</p>
+    </div>
+  </div>
+
+  <!-- ── STAT CARDS ── -->
+  @if(loadingStats) {
+    <div class="stats-grid">
+      @for(i of [1,2,3,4,5]; track i) {
+        <div class="stat-card">
+          <p-skeleton shape="circle" size="3.5rem" />
+          <div class="stat-info">
+            <p-skeleton width="3rem" height="2rem" />
+            <p-skeleton width="5rem" height="0.8rem" styleClass="mt-1" />
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="stats-grid">
+      @for(stat of stats; track stat.title) {
+        <div class="stat-card">
+          <div class="stat-icon {{ stat.bg }}">
+            <i class="pi {{ stat.icon }} {{ stat.color }}"></i>
+          </div>
+          <div class="stat-info">
+            <span class="stat-value">
+              @if(stat.suffix) { <small class="stat-suffix">{{ stat.suffix }}</small> }
+              {{ stat.value }}
+            </span>
+            <span class="stat-title">{{ stat.title }}</span>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── ÚLTIMAS RESERVAS ── -->
+  <div class="section-card">
+    <div class="section-header">
+      <h2 class="section-title">
+        <i class="pi pi-calendar-clock mr-2 text-amber-500"></i>
+        Reservas recientes
+      </h2>
+      <a routerLink="/appointments" class="section-link">Ver todas</a>
+    </div>
+
+    @if(loadingStats) {
+      <div class="flex flex-col gap-3 p-4">
+        @for(i of [1,2,3,4]; track i) {
+          <p-skeleton height="3rem" />
+        }
+      </div>
+    } @else if(recentAppointments.length === 0) {
+      <div class="empty-state">
+        <i class="pi pi-calendar-times text-5xl text-slate-200 mb-3"></i>
+        <p class="text-slate-400">No hay reservas registradas aún.</p>
+      </div>
+    } @else {
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Barbero</th>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Total</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for(apt of recentAppointments; track apt.idAppointment) {
+              <tr>
+                <td>
+                  @if(apt.parentCustomer) {
+                    <span class="person-cell">
+                      <span class="mini-avatar">{{ apt.parentCustomer.firstName?.charAt(0) }}{{ apt.parentCustomer.surName?.charAt(0) }}</span>
+                      {{ apt.parentCustomer.firstName }} {{ apt.parentCustomer.surName }}
+                    </span>
+                  } @else { <span class="text-slate-400">—</span> }
+                </td>
+                <td class="text-slate-600">
+                  {{ apt.parentUser ? apt.parentUser.firstName + ' ' + apt.parentUser.surName : '—' }}
+                </td>
+                <td><span class="date-chip">{{ apt.appointmentDate }}</span></td>
+                <td class="text-slate-500 text-sm">{{ apt.startHour }} – {{ apt.endHour }}</td>
+                <td class="font-semibold">S/ {{ apt.total | number:'1.2-2' }}</td>
+                <td>
+                  <p-tag [value]="apt.status" [severity]="getStatusSeverity(apt.status)" />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <!-- ── ACCESO RÁPIDO ── -->
+  <div class="section-card">
+    <h2 class="section-title mb-4">
+      <i class="pi pi-bolt mr-2 text-amber-500"></i>
+      Acceso rápido
+    </h2>
+    <div class="quick-grid">
+      <a routerLink="/users" class="quick-card">
+        <div class="quick-icon bg-blue-50"><i class="pi pi-user-plus text-blue-500"></i></div>
+        <span>Usuarios</span>
+      </a>
+      <a routerLink="/customers" class="quick-card">
+        <div class="quick-icon bg-green-50"><i class="pi pi-users text-green-500"></i></div>
+        <span>Clientes</span>
+      </a>
+      <a routerLink="/appointments" class="quick-card">
+        <div class="quick-icon bg-amber-50"><i class="pi pi-calendar-plus text-amber-500"></i></div>
+        <span>Reservas</span>
+      </a>
+      <a routerLink="/services" class="quick-card">
+        <div class="quick-icon bg-purple-50"><i class="pi pi-tag text-purple-500"></i></div>
+        <span>Servicios</span>
+      </a>
+    </div>
+  </div>
+
+</div>

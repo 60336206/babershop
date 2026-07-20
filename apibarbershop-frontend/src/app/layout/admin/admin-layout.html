@@ -1,0 +1,80 @@
+<div class="admin-shell" [class.sidebar-collapsed]="sidebarCollapsed">
+
+  <!-- ══ SIDEBAR ══ -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">
+        <i class="pi pi-scissors"></i>
+      </div>
+      @if(!sidebarCollapsed) {
+        <span class="brand-name">BarberShop</span>
+      }
+    </div>
+
+    <nav class="sidebar-nav">
+      @for(item of navItems; track item.route) {
+        <a
+          [routerLink]="item.route"
+          class="nav-item"
+          [class.active]="isActive(item.route)"
+          [pTooltip]="sidebarCollapsed ? item.label : ''"
+          tooltipPosition="right"
+        >
+          <i class="pi {{ item.icon }} nav-icon"></i>
+          @if(!sidebarCollapsed) {
+            <span class="nav-label">{{ item.label }}</span>
+          }
+          @if(isActive(item.route)) {
+            <span class="nav-active-bar"></span>
+          }
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="collapse-btn" (click)="toggleSidebar()">
+        <i class="pi" [class.pi-chevron-left]="!sidebarCollapsed" [class.pi-chevron-right]="sidebarCollapsed"></i>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ══ MAIN AREA ══ -->
+  <div class="admin-main">
+
+    <!-- TOPBAR -->
+    <header class="admin-topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" (click)="toggleSidebar()">
+          <i class="pi pi-bars"></i>
+        </button>
+        <div class="breadcrumb">
+          <span class="breadcrumb-home">Admin</span>
+          <i class="pi pi-angle-right breadcrumb-sep"></i>
+          <span class="breadcrumb-current">{{ pageName }}</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="user-chip" (click)="menu.toggle($event)">
+          @if(user?.photo) {
+            <p-avatar [image]="user!.photo" shape="circle" size="normal" />
+          } @else {
+            <div class="user-initials-avatar">{{ userInitials }}</div>
+          }
+          <div class="user-chip-info">
+            <span class="user-chip-name">{{ user?.firstName }} {{ user?.surName }}</span>
+            <span class="user-chip-role">{{ user?.role }}</span>
+          </div>
+          <i class="pi pi-angle-down text-slate-400 text-xs"></i>
+        </div>
+        <p-menu #menu [model]="profileItems" [popup]="true" />
+      </div>
+    </header>
+
+    <!-- PAGE CONTENT -->
+    <main class="admin-content">
+      <router-outlet />
+    </main>
+
+  </div>
+</div>
