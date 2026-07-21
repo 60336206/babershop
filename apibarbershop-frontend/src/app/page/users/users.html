@@ -72,8 +72,8 @@
     <ng-template #body let-user>
       <tr>
         <td>
-          @if(user.photo) {
-            <p-avatar [image]="user.photo" shape="circle" size="large" />
+          @if(user.photoUrl) {
+            <p-avatar [image]="user.photoUrl" shape="circle" size="large" />
           } @else {
             <p-avatar icon="pi pi-user" shape="circle" size="large"
               [style]="{ 'background-color': '#e2e8f0', 'color': '#64748b' }"

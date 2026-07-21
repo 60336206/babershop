@@ -22,11 +22,19 @@ public class WebConfig implements WebMvcConfigurer {
             .allowCredentials(true);
     }
 
+    @Value("${upload.users.path:uploads/users/}")
+    private String userUploadPath;
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // Sirve las imágenes de referencia subidas por el cliente al reservar
-        String location = appointmentUploadPath.endsWith("/") ? appointmentUploadPath : appointmentUploadPath + "/";
+        String appointmentLocation = appointmentUploadPath.endsWith("/") ? appointmentUploadPath : appointmentUploadPath + "/";
         registry.addResourceHandler("/uploads/appointments/**")
-            .addResourceLocations("file:" + location);
+            .addResourceLocations("file:" + appointmentLocation);
+
+        // Sirve las fotos de los usuarios/barberos
+        String userLocation = userUploadPath.endsWith("/") ? userUploadPath : userUploadPath + "/";
+        registry.addResourceHandler("/uploads/users/**")
+            .addResourceLocations("file:" + userLocation);
     }
 }

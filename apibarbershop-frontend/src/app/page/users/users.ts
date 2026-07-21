@@ -129,7 +129,10 @@ export class Users implements OnInit {
     this.loading = true;
     this.api.invoke(apiusergetall).then((response: any) => {
       const data = typeof response === 'string' ? JSON.parse(response) : response;
-      this.listUser = data?.listUser ?? [];
+      this.listUser = data?.listUser?.map((u: any) => ({
+        ...u,
+        photoUrl: u.photo ? (this.api.rootUrl + (u.photo.startsWith('/') ? '' : '/') + u.photo) : null
+      })) ?? [];
       this.loading = false;
       this.cdr.detectChanges();
     }).catch(() => {
