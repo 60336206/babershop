@@ -63,6 +63,7 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.POST, "/appointment/insert").permitAll()
 				.requestMatchers(HttpMethod.POST, "/appointment/upload-image/**").permitAll()
 				.requestMatchers(HttpMethod.GET, "/uploads/appointments/**").permitAll()
+				.requestMatchers(HttpMethod.GET, "/uploads/users/**").permitAll()
 				.requestMatchers(HttpMethod.GET, "/barberschedule/availablehours/**").permitAll()
 
 				// ── ADMINISTRADOR — gestión completa ──
