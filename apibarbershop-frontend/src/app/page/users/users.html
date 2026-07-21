@@ -183,6 +183,11 @@
         }
       </div>
 
+      <div class="form-field form-field--full">
+        <label>Foto de Perfil (Opcional)</label>
+        <input type="file" accept="image/*" (change)="onPhotoSelected($event)" class="w-full p-inputtext p-2" />
+      </div>
+
       @if(!isEditing) {
         <div class="form-field form-field--full">
           <label>Contraseña *</label>

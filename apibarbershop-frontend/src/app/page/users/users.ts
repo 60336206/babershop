@@ -77,6 +77,7 @@ export class Users implements OnInit {
   private readonly messageService    = inject(MessageService);
   private readonly confirmationService = inject(ConfirmationService);
   private readonly cdr               = inject(ChangeDetectorRef);
+  private readonly http              = inject(HttpClient);
 
   listUser: any[] = [];
   loading = false;
@@ -84,6 +85,7 @@ export class Users implements OnInit {
   dialogVisible = false;
   isEditing = false;
   savingUser = false;
+  selectedPhoto: File | null = null;
 
   searchValue = '';
 
@@ -138,6 +140,7 @@ export class Users implements OnInit {
 
   openNew(): void {
     this.isEditing = false;
+    this.selectedPhoto = null;
     this.frmUser.reset();
     this.passwordFb.setValidators([Validators.required, Validators.minLength(6)]);
     this.passwordFb.updateValueAndValidity();
@@ -146,6 +149,7 @@ export class Users implements OnInit {
 
   openEdit(user: any): void {
     this.isEditing = true;
+    this.selectedPhoto = null;
     this.frmUser.patchValue({
       idUser:    user.idUser,
       firstName: user.firstName,
@@ -159,6 +163,27 @@ export class Users implements OnInit {
     this.passwordFb.clearValidators();
     this.passwordFb.updateValueAndValidity();
     this.dialogVisible = true;
+  }
+
+  onPhotoSelected(event: any): void {
+    if (event.target.files && event.target.files.length > 0) {
+      this.selectedPhoto = event.target.files[0];
+    } else {
+      this.selectedPhoto = null;
+    }
+  }
+
+  private uploadPhoto(idUser: string, callback: () => void): void {
+    if (!this.selectedPhoto) {
+      callback();
+      return;
+    }
+    const formData = new FormData();
+    formData.append('file', this.selectedPhoto);
+    this.http.post(`${this.api.rootUrl}/user/upload-photo/${idUser}`, formData).subscribe({
+      next: () => callback(),
+      error: () => callback() // We still proceed even if photo fails
+    });
   }
 
   saveUser(): void {
@@ -185,9 +210,11 @@ export class Users implements OnInit {
       this.api.invoke(apiuserupdate, { body }).then((response: any) => {
         const data = typeof response === 'string' ? JSON.parse(response) : response;
         if (data?.type === 'success') {
-          this.messageService.add({ severity: 'success', summary: 'Correcto', detail: data.listMessage?.[0] ?? 'Usuario actualizado.' });
-          this.dialogVisible = false;
-          this.loadUsers();
+          this.uploadPhoto(this.frmUser.value.idUser, () => {
+            this.messageService.add({ severity: 'success', summary: 'Correcto', detail: data.listMessage?.[0] ?? 'Usuario actualizado.' });
+            this.dialogVisible = false;
+            this.loadUsers();
+          });
         } else {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: data.listMessage?.[0] ?? 'No se pudo actualizar.' });
         }
@@ -212,9 +239,11 @@ export class Users implements OnInit {
       this.api.invoke(apiuserinsert, { body }).then((response: any) => {
         const data = typeof response === 'string' ? JSON.parse(response) : response;
         if (data?.type === 'success') {
-          this.messageService.add({ severity: 'success', summary: 'Correcto', detail: data.listMessage?.[0] ?? 'Usuario registrado.' });
-          this.dialogVisible = false;
-          this.loadUsers();
+          this.uploadPhoto(data.idUser, () => {
+            this.messageService.add({ severity: 'success', summary: 'Correcto', detail: data.listMessage?.[0] ?? 'Usuario registrado.' });
+            this.dialogVisible = false;
+            this.loadUsers();
+          });
         } else {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: data.listMessage?.[0] ?? 'No se pudo registrar.' });
         }

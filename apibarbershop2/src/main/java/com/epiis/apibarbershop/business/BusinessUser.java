@@ -86,6 +86,7 @@ public class BusinessUser {
 
 		repositoryUser.save(entity);
 
+		response.setIdUser(entity.getIdUser());
 		response.success();
 		response.listMessage.add("Usuario registrado correctamente.");
 		return response;
