@@ -176,6 +176,7 @@ export class Users implements OnInit {
         firstName: this.frmUser.value.firstName,
         surName:   this.frmUser.value.surName,
         email:     this.frmUser.value.email,
+        phone:     this.frmUser.value.phone,
         role:      this.frmUser.value.role,
         photo:     '',
         status:    this.frmUser.value.status
@@ -202,6 +203,7 @@ export class Users implements OnInit {
         firstName: this.frmUser.value.firstName,
         surName:   this.frmUser.value.surName,
         email:     this.frmUser.value.email,
+        phone:     this.frmUser.value.phone,
         password:  this.frmUser.value.password,
         role:      this.frmUser.value.role,
         photo:     ''
