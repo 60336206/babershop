@@ -12,7 +12,6 @@
   "engines": {
     "node": "22.x"
   },
-  "packageManager": "npm@11.6.2",
   "dependencies": {
     "@angular/common": "^21.2.0",
     "@angular/compiler": "^21.2.0",
