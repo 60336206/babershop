@@ -6,6 +6,11 @@ import com.epiis.apibarbershop.entity.EntityCustomer;
 
 @Repository
 public interface RepositoryCustomer extends JpaRepository<EntityCustomer, String> {
-    java.util.Optional<EntityCustomer> findByEmail(String email);
+    @org.springframework.data.jpa.repository.Query("SELECT c FROM EntityCustomer c WHERE c.email = ?1")
+    java.util.List<EntityCustomer> _internalFindByEmail(String email);
+
+    default java.util.Optional<EntityCustomer> findByEmail(String email) {
+        return _internalFindByEmail(email).stream().findFirst();
+    }
     java.util.Optional<EntityCustomer> findByPhone(String phone);
 }
