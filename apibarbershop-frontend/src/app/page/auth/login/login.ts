@@ -72,7 +72,7 @@ export class Login {
           surName:   data.surName,
           email:     data.email,
           role:      data.role,
-          photo:     data.photo ?? '',
+          photo:     data.photo ? (this.api.rootUrl + (data.photo.startsWith('/') ? '' : '/') + data.photo) : '',
           idUser:    data.idUser
         });
 
