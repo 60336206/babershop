@@ -18,16 +18,26 @@ import com.epiis.apibarbershop.repository.RepositoryAppointment;
 import com.epiis.apibarbershop.repository.RepositoryAppointmentDetail;
 import com.epiis.apibarbershop.staticdata.EnumAppointmentStatus;
 
+import com.epiis.apibarbershop.repository.RepositoryCustomer;
+import com.epiis.apibarbershop.service.WhatsAppService;
+import com.epiis.apibarbershop.entity.EntityCustomer;
+
 @Service
 public class BusinessAppointment {
 	private final RepositoryAppointment repositoryAppointment;
 	private final RepositoryAppointmentDetail repositoryAppointmentDetail;
+	private final RepositoryCustomer repositoryCustomer;
+	private final WhatsAppService whatsAppService;
 
 	public BusinessAppointment(
 		RepositoryAppointment repositoryAppointment,
-		RepositoryAppointmentDetail repositoryAppointmentDetail) {
+		RepositoryAppointmentDetail repositoryAppointmentDetail,
+		RepositoryCustomer repositoryCustomer,
+		WhatsAppService whatsAppService) {
 		this.repositoryAppointment = repositoryAppointment;
 		this.repositoryAppointmentDetail = repositoryAppointmentDetail;
+		this.repositoryCustomer = repositoryCustomer;
+		this.whatsAppService = whatsAppService;
 	}
 
 	public ResponseAppointmentInsert insert(RequestAppointmentInsert request) {
@@ -81,6 +91,8 @@ public class BusinessAppointment {
 		}
 
 		EntityAppointment entity = optional.get();
+		String oldStatus = entity.getStatus();
+
 		entity.setAppointmentDate(Date.valueOf(request.getAppointmentDate()));
 		entity.setStartHour(Time.valueOf(request.getStartHour()));
 		entity.setEndHour(Time.valueOf(request.getEndHour()));
@@ -89,6 +101,19 @@ public class BusinessAppointment {
 		entity.setUpdatedAt(new java.util.Date());
 
 		repositoryAppointment.save(entity);
+
+		// Notificación de WhatsApp si la reserva ha sido Confirmada por primera vez
+		if (!"Confirmada".equalsIgnoreCase(oldStatus) && "Confirmada".equalsIgnoreCase(request.getStatus())) {
+			Optional<EntityCustomer> optCustomer = repositoryCustomer.findById(entity.getIdCustomer());
+			if (optCustomer.isPresent()) {
+				EntityCustomer customer = optCustomer.get();
+				if (customer.getPhone() != null && !customer.getPhone().trim().isEmpty()) {
+					String dateStr = entity.getAppointmentDate().toString();
+					String timeStr = entity.getStartHour().toString().substring(0, 5);
+					whatsAppService.sendConfirmationMessage(customer.getPhone(), customer.getFirstName(), dateStr, timeStr);
+				}
+			}
+		}
 
 		response.success();
 		response.listMessage.add("Reserva actualizada correctamente.");
