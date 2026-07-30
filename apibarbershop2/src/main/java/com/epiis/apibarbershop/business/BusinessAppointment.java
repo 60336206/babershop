@@ -20,6 +20,7 @@ import com.epiis.apibarbershop.staticdata.EnumAppointmentStatus;
 
 import com.epiis.apibarbershop.repository.RepositoryCustomer;
 import com.epiis.apibarbershop.service.WhatsAppService;
+import com.epiis.apibarbershop.service.EmailService;
 import com.epiis.apibarbershop.entity.EntityCustomer;
 
 @Service
@@ -28,16 +29,19 @@ public class BusinessAppointment {
 	private final RepositoryAppointmentDetail repositoryAppointmentDetail;
 	private final RepositoryCustomer repositoryCustomer;
 	private final WhatsAppService whatsAppService;
+	private final EmailService emailService;
 
 	public BusinessAppointment(
 		RepositoryAppointment repositoryAppointment,
 		RepositoryAppointmentDetail repositoryAppointmentDetail,
 		RepositoryCustomer repositoryCustomer,
-		WhatsAppService whatsAppService) {
+		WhatsAppService whatsAppService,
+		EmailService emailService) {
 		this.repositoryAppointment = repositoryAppointment;
 		this.repositoryAppointmentDetail = repositoryAppointmentDetail;
 		this.repositoryCustomer = repositoryCustomer;
 		this.whatsAppService = whatsAppService;
+		this.emailService = emailService;
 	}
 
 	public ResponseAppointmentInsert insert(RequestAppointmentInsert request) {
@@ -102,16 +106,23 @@ public class BusinessAppointment {
 
 		repositoryAppointment.save(entity);
 
-		// Notificación de WhatsApp si la reserva ha sido Confirmada por primera vez
+		// Notificación si la reserva ha sido Confirmada por primera vez
 		if (!"Confirmada".equalsIgnoreCase(oldStatus) && "Confirmada".equalsIgnoreCase(request.getStatus())) {
 			Optional<EntityCustomer> optCustomer = repositoryCustomer.findById(entity.getIdCustomer());
 			if (optCustomer.isPresent()) {
 				EntityCustomer customer = optCustomer.get();
-				if (customer.getPhone() != null && !customer.getPhone().trim().isEmpty()) {
-					String dateStr = entity.getAppointmentDate().toString();
-					String timeStr = entity.getStartHour().toString().substring(0, 5);
-					whatsAppService.sendConfirmationMessage(customer.getPhone(), customer.getFirstName(), dateStr, timeStr);
+				String dateStr = entity.getAppointmentDate().toString();
+				String timeStr = entity.getStartHour().toString().substring(0, 5);
+
+				// Correo Electrónico
+				if (customer.getEmail() != null && !customer.getEmail().trim().isEmpty()) {
+					emailService.sendConfirmationMessage(customer.getEmail(), customer.getFirstName(), dateStr, timeStr);
 				}
+				
+				// WhatsApp (Dejado configurado por si acaso)
+				// if (customer.getPhone() != null && !customer.getPhone().trim().isEmpty()) {
+				//	 whatsAppService.sendConfirmationMessage(customer.getPhone(), customer.getFirstName(), dateStr, timeStr);
+				// }
 			}
 		}
 
