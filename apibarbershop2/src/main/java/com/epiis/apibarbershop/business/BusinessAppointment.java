@@ -136,25 +136,37 @@ public class BusinessAppointment {
 
 		repositoryAppointment.save(entity);
 
-		// Notificación si la reserva ha sido Confirmada por primera vez
+		// Notificación por correo electrónico al confirmar
 		try {
-			if (!"Confirmada".equalsIgnoreCase(oldStatus) && "Confirmada".equalsIgnoreCase(request.getStatus())) {
+			System.out.println("=== NOTIFICACIÓN: oldStatus=" + oldStatus + ", newStatus=" + request.getStatus() + " ===");
+			if ("Confirmada".equalsIgnoreCase(request.getStatus())) {
+				System.out.println("Estado es Confirmada, buscando cliente...");
 				if (entity.getIdCustomer() != null) {
 					Optional<EntityCustomer> optCustomer = repositoryCustomer.findById(entity.getIdCustomer());
+					System.out.println("Cliente encontrado: " + optCustomer.isPresent());
 					if (optCustomer.isPresent()) {
 						EntityCustomer customer = optCustomer.get();
 						String dateStr = entity.getAppointmentDate() != null ? entity.getAppointmentDate().toString() : "";
 						String timeStr = entity.getStartHour() != null ? entity.getStartHour().toString().substring(0, 5) : "";
+						System.out.println("Email del cliente: " + customer.getEmail());
+						System.out.println("Nombre: " + customer.getFirstName() + ", Fecha: " + dateStr + ", Hora: " + timeStr);
 
 						// Correo Electrónico
 						if (customer.getEmail() != null && !customer.getEmail().trim().isEmpty()) {
+							System.out.println("Enviando correo a: " + customer.getEmail());
 							emailService.sendConfirmationMessage(customer.getEmail(), customer.getFirstName(), dateStr, timeStr);
+							System.out.println("Correo enviado exitosamente.");
+						} else {
+							System.out.println("El cliente NO tiene email registrado.");
 						}
 					}
+				} else {
+					System.out.println("La reserva NO tiene cliente asignado (idCustomer es null).");
 				}
 			}
 		} catch (Exception e) {
-			System.err.println("Error al enviar notificación (no afecta la reserva): " + e.getMessage());
+			System.err.println("Error al enviar notificación: " + e.getMessage());
+			e.printStackTrace();
 		}
 
 		response.success();
