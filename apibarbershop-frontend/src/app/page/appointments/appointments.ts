@@ -233,7 +233,7 @@ export class Appointments implements OnInit {
         this.messageService.add({ severity: 'success', summary: 'Correcto', detail: `Reserva marcada como ${newStatus}.` });
         this.cdr.detectChanges();
       } else {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar el estado.' });
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: data.listMessage?.[0] || 'No se pudo actualizar el estado.' });
       }
     }).catch(() => {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error de conexión.' });

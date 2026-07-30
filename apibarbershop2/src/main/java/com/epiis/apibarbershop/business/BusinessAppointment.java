@@ -53,9 +53,15 @@ public class BusinessAppointment {
 		entity.setIdAppointment(UUID.randomUUID().toString());
 		entity.setIdCustomer(request.getIdCustomer());
 		entity.setIdUser(request.getIdUser());
+		String startHourStr = request.getStartHour();
+		if (startHourStr != null && startHourStr.length() == 5) startHourStr += ":00";
+		
+		String endHourStr = request.getEndHour();
+		if (endHourStr != null && endHourStr.length() == 5) endHourStr += ":00";
+
 		entity.setAppointmentDate(Date.valueOf(request.getAppointmentDate()));
-		entity.setStartHour(Time.valueOf(request.getStartHour()));
-		entity.setEndHour(Time.valueOf(request.getEndHour()));
+		entity.setStartHour(Time.valueOf(startHourStr));
+		entity.setEndHour(Time.valueOf(endHourStr));
 		entity.setTotal(request.getTotal());
 		entity.setStatus(EnumAppointmentStatus.PENDING.toString());
 		entity.setObservation(request.getObservation());
@@ -97,9 +103,15 @@ public class BusinessAppointment {
 		EntityAppointment entity = optional.get();
 		String oldStatus = entity.getStatus();
 
+		String startHourStr = request.getStartHour();
+		if (startHourStr != null && startHourStr.length() == 5) startHourStr += ":00";
+		
+		String endHourStr = request.getEndHour();
+		if (endHourStr != null && endHourStr.length() == 5) endHourStr += ":00";
+
 		entity.setAppointmentDate(Date.valueOf(request.getAppointmentDate()));
-		entity.setStartHour(Time.valueOf(request.getStartHour()));
-		entity.setEndHour(Time.valueOf(request.getEndHour()));
+		entity.setStartHour(Time.valueOf(startHourStr));
+		entity.setEndHour(Time.valueOf(endHourStr));
 		entity.setStatus(request.getStatus());
 		entity.setObservation(request.getObservation());
 		entity.setUpdatedAt(new java.util.Date());
