@@ -36,7 +36,15 @@ public class AppointmentController {
 	// Admin + Barbero
 	@PutMapping(path = "update")
 	public ResponseEntity<ResponseAppointmentUpdate> actionUpdate(@RequestBody RequestAppointmentUpdate request) {
-		try { return ResponseEntity.ok(businessAppointment.update(request)); } catch (Exception _) { return null; }
+		try { 
+			return ResponseEntity.ok(businessAppointment.update(request)); 
+		} catch (Exception e) { 
+			log.error("Error al actualizar la reserva", e);
+			ResponseAppointmentUpdate response = new ResponseAppointmentUpdate();
+			response.exception();
+			response.listMessage.add("Error interno del servidor: " + e.getMessage());
+			return ResponseEntity.ok(response);
+		}
 	}
 
 	// Admin

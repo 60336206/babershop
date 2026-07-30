@@ -108,8 +108,9 @@ public class BusinessAppointment {
 
 		// Notificación si la reserva ha sido Confirmada por primera vez
 		if (!"Confirmada".equalsIgnoreCase(oldStatus) && "Confirmada".equalsIgnoreCase(request.getStatus())) {
-			Optional<EntityCustomer> optCustomer = repositoryCustomer.findById(entity.getIdCustomer());
-			if (optCustomer.isPresent()) {
+			if (entity.getIdCustomer() != null) {
+				Optional<EntityCustomer> optCustomer = repositoryCustomer.findById(entity.getIdCustomer());
+				if (optCustomer.isPresent()) {
 				EntityCustomer customer = optCustomer.get();
 				String dateStr = entity.getAppointmentDate().toString();
 				String timeStr = entity.getStartHour().toString().substring(0, 5);
@@ -123,6 +124,7 @@ public class BusinessAppointment {
 				// if (customer.getPhone() != null && !customer.getPhone().trim().isEmpty()) {
 				//	 whatsAppService.sendConfirmationMessage(customer.getPhone(), customer.getFirstName(), dateStr, timeStr);
 				// }
+				}
 			}
 		}
 
