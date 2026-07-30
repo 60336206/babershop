@@ -103,41 +103,58 @@ public class BusinessAppointment {
 		EntityAppointment entity = optional.get();
 		String oldStatus = entity.getStatus();
 
-		String startHourStr = request.getStartHour();
-		if (startHourStr != null && startHourStr.length() == 5) startHourStr += ":00";
-		
-		String endHourStr = request.getEndHour();
-		if (endHourStr != null && endHourStr.length() == 5) endHourStr += ":00";
+		// Solo actualizar fecha/hora si vienen como cadenas válidas (formato "yyyy-MM-dd" / "HH:mm:ss")
+		// Si el frontend envía timestamps numéricos, los ignoramos y dejamos los valores que ya tiene la entidad
+		try {
+			if (request.getAppointmentDate() != null && request.getAppointmentDate().matches("\\d{4}-\\d{2}-\\d{2}")) {
+				entity.setAppointmentDate(Date.valueOf(request.getAppointmentDate()));
+			}
+		} catch (Exception ignored) {}
 
-		entity.setAppointmentDate(Date.valueOf(request.getAppointmentDate()));
-		entity.setStartHour(Time.valueOf(startHourStr));
-		entity.setEndHour(Time.valueOf(endHourStr));
-		entity.setStatus(request.getStatus());
+		try {
+			String startHourStr = request.getStartHour();
+			if (startHourStr != null && startHourStr.matches("\\d{2}:\\d{2}(:\\d{2})?")) {
+				if (startHourStr.length() == 5) startHourStr += ":00";
+				entity.setStartHour(Time.valueOf(startHourStr));
+			}
+		} catch (Exception ignored) {}
+
+		try {
+			String endHourStr = request.getEndHour();
+			if (endHourStr != null && endHourStr.matches("\\d{2}:\\d{2}(:\\d{2})?")) {
+				if (endHourStr.length() == 5) endHourStr += ":00";
+				entity.setEndHour(Time.valueOf(endHourStr));
+			}
+		} catch (Exception ignored) {}
+
+		// Estado y observación siempre se actualizan
+		if (request.getStatus() != null) {
+			entity.setStatus(request.getStatus());
+		}
 		entity.setObservation(request.getObservation());
 		entity.setUpdatedAt(new java.util.Date());
 
 		repositoryAppointment.save(entity);
 
 		// Notificación si la reserva ha sido Confirmada por primera vez
-		if (!"Confirmada".equalsIgnoreCase(oldStatus) && "Confirmada".equalsIgnoreCase(request.getStatus())) {
-			if (entity.getIdCustomer() != null) {
-				Optional<EntityCustomer> optCustomer = repositoryCustomer.findById(entity.getIdCustomer());
-				if (optCustomer.isPresent()) {
-				EntityCustomer customer = optCustomer.get();
-				String dateStr = entity.getAppointmentDate().toString();
-				String timeStr = entity.getStartHour().toString().substring(0, 5);
+		try {
+			if (!"Confirmada".equalsIgnoreCase(oldStatus) && "Confirmada".equalsIgnoreCase(request.getStatus())) {
+				if (entity.getIdCustomer() != null) {
+					Optional<EntityCustomer> optCustomer = repositoryCustomer.findById(entity.getIdCustomer());
+					if (optCustomer.isPresent()) {
+						EntityCustomer customer = optCustomer.get();
+						String dateStr = entity.getAppointmentDate() != null ? entity.getAppointmentDate().toString() : "";
+						String timeStr = entity.getStartHour() != null ? entity.getStartHour().toString().substring(0, 5) : "";
 
-				// Correo Electrónico
-				if (customer.getEmail() != null && !customer.getEmail().trim().isEmpty()) {
-					emailService.sendConfirmationMessage(customer.getEmail(), customer.getFirstName(), dateStr, timeStr);
-				}
-				
-				// WhatsApp (Dejado configurado por si acaso)
-				// if (customer.getPhone() != null && !customer.getPhone().trim().isEmpty()) {
-				//	 whatsAppService.sendConfirmationMessage(customer.getPhone(), customer.getFirstName(), dateStr, timeStr);
-				// }
+						// Correo Electrónico
+						if (customer.getEmail() != null && !customer.getEmail().trim().isEmpty()) {
+							emailService.sendConfirmationMessage(customer.getEmail(), customer.getFirstName(), dateStr, timeStr);
+						}
+					}
 				}
 			}
+		} catch (Exception e) {
+			System.err.println("Error al enviar notificación (no afecta la reserva): " + e.getMessage());
 		}
 
 		response.success();
