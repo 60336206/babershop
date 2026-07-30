@@ -16,7 +16,7 @@ public class EmailService {
     public void sendConfirmationMessage(String toEmail, String customerName, String date, String time) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("tu_correo@gmail.com"); // Debe coincidir con el username de properties o dejar que Spring lo ponga
+            message.setFrom("abarriosllasaycca@gmail.com");
             message.setTo(toEmail);
             message.setSubject("Confirmación de Reserva - BarberShop");
             
