@@ -86,6 +86,7 @@
             <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="secondary" pTooltip="Editar" (onClick)="openEdit(apt)" />
             @if(apt.status === 'Pendiente') {
               <p-button icon="pi pi-check" [rounded]="true" [text]="true" severity="success" pTooltip="Confirmar" (onClick)="quickStatus(apt, 'Confirmada')" />
+              <p-button icon="pi pi-times" [rounded]="true" [text]="true" severity="danger" pTooltip="Rechazar / Cancelar" (onClick)="quickStatus(apt, 'Cancelada')" />
             }
             @if(apt.status !== 'Finalizada' && apt.status !== 'Cancelada') {
               <p-button icon="pi pi-flag" [rounded]="true" [text]="true" pTooltip="Finalizar" (onClick)="quickStatus(apt, 'Finalizada')" />
