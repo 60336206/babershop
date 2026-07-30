@@ -1,0 +1,121 @@
+<div class="card bg-white shadow-sm rounded-lg w-full p-4">
+	<h2 class="text-xl font-semibold mb-4">Listado de Sugerencias</h2>
+
+	<p-table [value]="listSuggestion" [loading]="loading" stripedRows>
+		<ng-template #header>
+			<tr>
+				<th>Código</th>
+				<th>Persona</th>
+				<th>Descripción</th>
+				<th>Estado</th>
+				<th>Fecha de registro</th>
+				<th class="text-center">Acciones</th>
+			</tr>
+		</ng-template>
+		<ng-template #body let-item>
+			<tr>
+				<td>{{ item.code }}</td>
+				<td>{{ item.personFullName || '—' }}</td>
+				<td>
+					<span class="line-clamp-2">{{ item.description }}</span>
+				</td>
+				<td>
+					<p-tag [value]="item.status" [severity]="getStatusSeverity(item.status)" />
+				</td>
+				<td>{{ item.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+				<td>
+					<div class="flex gap-2 justify-center">
+						<p-button
+							label="Mostrar detalles"
+							icon="pi pi-eye"
+							severity="info"
+							size="small"
+							(onClick)="openDetail(item)"
+						/>
+						<p-button
+							label="Rechazar sugerencia"
+							icon="pi pi-times-circle"
+							severity="danger"
+							size="small"
+							[disabled]="item.status === 'Rechazado'"
+							(onClick)="confirmReject($event, item)"
+						/>
+					</div>
+				</td>
+			</tr>
+		</ng-template>
+		<ng-template #emptymessage>
+			<tr>
+				<td colspan="6" class="text-center text-gray-400 py-6">No hay sugerencias registradas.</td>
+			</tr>
+		</ng-template>
+	</p-table>
+</div>
+
+<p-dialog
+	[(visible)]="detailVisible"
+	[modal]="true"
+	[style]="{ width: '600px' }"
+	[draggable]="false"
+	[resizable]="false"
+	header="Detalle de Sugerencia"
+>
+	@if (selectedSuggestion) {
+		<div class="flex flex-col gap-3">
+			<div class="grid grid-cols-2 gap-3">
+				<div>
+					<p class="text-xs text-gray-500 font-medium uppercase">Código</p>
+					<p class="font-semibold">{{ selectedSuggestion.code }}</p>
+				</div>
+				<div>
+					<p class="text-xs text-gray-500 font-medium uppercase">Estado</p>
+					<p-tag [value]="selectedSuggestion.status" [severity]="getStatusSeverity(selectedSuggestion.status)" />
+				</div>
+				<div>
+					<p class="text-xs text-gray-500 font-medium uppercase">Persona</p>
+					<p>{{ selectedSuggestion.personFullName || '—' }}</p>
+				</div>
+				<div>
+					<p class="text-xs text-gray-500 font-medium uppercase">Oficina</p>
+					<p>{{ selectedSuggestion.idOffice }}</p>
+				</div>
+				<div>
+					<p class="text-xs text-gray-500 font-medium uppercase">Fecha de registro</p>
+					<p>{{ selectedSuggestion.createdAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+				</div>
+				<div>
+					<p class="text-xs text-gray-500 font-medium uppercase">Última actualización</p>
+					<p>{{ selectedSuggestion.updatedAt | date: 'dd/MM/yyyy HH:mm' }}</p>
+				</div>
+			</div>
+
+			<div>
+				<p class="text-xs text-gray-500 font-medium uppercase mb-1">Descripción</p>
+				<p class="bg-gray-50 rounded-lg p-3 text-sm">{{ selectedSuggestion.description }}</p>
+			</div>
+
+			<div>
+				<p class="text-xs text-gray-500 font-medium uppercase mb-2">
+					Archivos adjuntos
+					<span class="ml-1 text-gray-400">({{ selectedFiles.length }})</span>
+				</p>
+				@if (selectedFiles.length > 0) {
+					<ul class="flex flex-col gap-2">
+						@for (file of selectedFiles; track file.idSuggestionfile) {
+							<li class="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2 text-sm">
+								<i class="pi pi-file text-blue-500"></i>
+								<span class="flex-1">{{ file.name }}</span>
+								<p-tag [value]="file.extension.toUpperCase()" severity="secondary" />
+							</li>
+						}
+					</ul>
+				} @else {
+					<p class="text-gray-400 text-sm">Sin archivos adjuntos.</p>
+				}
+			</div>
+		</div>
+	}
+	<ng-template #footer>
+		<p-button label="Cerrar" icon="pi pi-times" severity="secondary" (onClick)="detailVisible = false" />
+	</ng-template>
+</p-dialog>

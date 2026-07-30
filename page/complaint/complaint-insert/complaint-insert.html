@@ -1,0 +1,173 @@
+<div class="card bg-white shadow-sm rounded-lg w-full p-4">
+  <form [formGroup]="frmInsert">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div class="flex flex-col gap-2">
+        <label class="font-medium">Nombre completo de quien denuncia</label>
+        <input
+          pInputText
+          formControlName="personFullName"
+          placeholder="Opcional"
+          class="w-full"
+        />
+      </div>
+      <div class="flex flex-col gap-2">
+        <label class="font-medium">Oficina*</label>
+        <p-select
+          [options]="listOffice"
+          formControlName="office"
+          optionLabel="name"
+          placeholder=""
+          class="w-full"
+        />
+        @if ((officeFb.touched || officeFb.dirty) && officeFb.hasError('required')) {
+          <small class="errorMessage">
+            Campo requerido.
+          </small>
+        }
+      </div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div class="flex flex-col gap-2">
+        <label class="font-medium">Tipo de acusado*</label>
+        <div class="flex gap-4 mt-1">
+          <div class="flex items-center gap-2">
+            <p-radiobutton
+              name="accusedType"
+              value="DOC"
+              [(ngModel)]="accusedType"
+              [ngModelOptions]="{standalone: true}"
+              inputId="typeDoc"
+            />
+            <label for="typeDoc">Doc.</label>
+          </div>
+          <div class="flex items-center gap-2">
+            <p-radiobutton
+              name="accusedType"
+              value="EST"
+              [(ngModel)]="accusedType"
+              [ngModelOptions]="{standalone: true}"
+              inputId="typeEst"
+            />
+            <label for="typeEst">Est.</label>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-col gap-2">
+        <label class="font-medium">Nombre del acusado*</label>
+
+        @if (accusedType === 'DOC') {
+          <p-autoComplete
+            [(ngModel)]="selectedProfessor"
+            [ngModelOptions]="{ standalone: true }"
+            [suggestions]="professorSuggestions"
+            (completeMethod)="searchProfessor($event)"
+            optionLabel="fullName"
+            placeholder="Ingresa el nombre del docente"
+            class="w-full"
+            [dropdown]="false"
+            [forceSelection]="true">
+            <ng-template let-professor pTemplate="item">
+              <div class="flex flex-col">
+                <span>{{ professor.fullName }}</span>
+                
+              </div>
+            </ng-template>
+            <ng-template let-professor pTemplate="selectedItem">
+              {{ professor?.fullName }}
+            </ng-template>
+          </p-autoComplete>
+        } @else {
+          <input
+            pInputText
+            [(ngModel)]="studentName"
+            [ngModelOptions]="{standalone: true}"
+            placeholder="Nombre completo del estudiante"
+            class="w-full"
+          />
+        }
+      </div>
+    </div>
+    <div class="flex flex-col gap-2 mb-4">
+      <label class="font-medium">Descripción de la denuncia*</label>
+      <textarea
+        pTextarea
+        formControlName="description"
+        rows="5"
+        class="w-full"
+        placeholder="Obligatorio">
+      </textarea>
+      @if ((descriptionFb.touched || descriptionFb.dirty) && descriptionFb.hasError('required')) {
+        <small class="errorMessage">
+          Campo requerido.
+        </small>
+      }
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div class="flex flex-col gap-2">
+        <label class="font-medium">Fecha del incidente</label>
+        <p-datepicker
+          [(ngModel)]="selectedDate"
+          [ngModelOptions]="{standalone: true}"
+          [inline]="true"
+          [showOtherMonths]="true"
+          class="w-full"
+          [maxDate]="today">
+        </p-datepicker>
+      </div>
+      <div class="flex flex-col gap-2">
+        <div class="flex items-center gap-3 mb-2">
+          <p-button
+            label="Agregar evidencia"
+            (click)="addFile()"
+          />
+          <span style="color: #999999; text-shadow: 0px 0px 1px">
+            Datos opcionales
+          </span>
+        </div>
+        <table class="w-full">
+          <thead>
+            @if (fileRowList.length > 0) {
+              <tr>
+                <th class="text-left text-sm font-semibold pb-1">
+                  Descripción
+                </th>
+                <th class="text-right text-sm font-semibold pb-1">
+                  Acciones
+                </th>
+              </tr>
+            }
+          </thead>
+          <tbody>
+            @for (value of fileRowList; track value.id) {
+              <tr>
+                <td>
+                  <p-fileUpload
+                    mode="basic"
+                    chooseLabel="Seleccionar archivo"
+                    styleClass="text-xs py-1 px-3 rounded-lg"
+                    (onSelect)="onFileSelect($event, value.id)"
+                  />
+                </td>
+                <td class="text-right">
+                  <p-button
+                    label="Retirar"
+                    severity="danger"
+                    (click)="removeFile(value)"
+                  />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <hr />
+    <div class="flex justify-end mt-3">
+      <p-button
+        label="Registrar datos"
+        severity="info"
+        (click)="sendInsert($event)"
+      />
+    </div>
+  </form>
+</div>

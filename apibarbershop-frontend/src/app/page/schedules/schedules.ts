@@ -131,9 +131,9 @@ export class Schedules implements OnInit {
     this.api.invoke(apiusergetall).then((response: any) => {
       const data = typeof response === 'string' ? JSON.parse(response) : response;
       const allUsers = data?.listUser ?? [];
-      // Filtrar barberos y administradores que pueden tener horarios
+      // Filtrar solo barberos que pueden tener horarios
       this.listBarbers = allUsers.filter((u: any) => 
-        u.role === 'BARBER' || u.role === 'ADMIN'
+        u.role === 'BARBER'
       );
       if (this.listBarbers.length > 0) {
         this.selectedBarberId = this.listBarbers[0].idUser;
