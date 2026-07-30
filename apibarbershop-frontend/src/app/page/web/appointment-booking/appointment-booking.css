@@ -3,7 +3,7 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: #0f172a;
+  background: #1d3477;
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
@@ -26,7 +26,7 @@
   color: #ffffff;
 }
 
-.booking-logo i { color: #f59e0b; }
+.booking-logo i { color: #f0282e; }
 
 /* ══ PAGE ══ */
 .booking-page {
@@ -48,7 +48,7 @@
 .booking-title {
   font-size: 2rem;
   font-weight: 800;
-  color: #0f172a;
+  color: #1d3477;
   margin: 0 0 0.5rem;
 }
 
@@ -133,8 +133,8 @@
 }
 
 .service-select-card.selected {
-  border-color: #0f172a;
-  box-shadow: 0 0 0 3px rgba(15,23,42,0.12);
+  border-color: #1d3477;
+  box-shadow: 0 0 0 3px rgba(29,52,119,0.12);
 }
 
 .service-select-check {
@@ -142,7 +142,7 @@
   top: 0.6rem;
   right: 0.6rem;
   font-size: 1.3rem;
-  color: #0f172a;
+  color: #1d3477;
   z-index: 2;
 }
 
@@ -189,7 +189,7 @@
   font-size: 0.85rem;
 }
 
-.service-select-meta strong { color: #0f172a; }
+.service-select-meta strong { color: #1d3477; }
 
 .service-select-meta span {
   color: #94a3b8;
@@ -396,7 +396,7 @@
 .success-title {
   font-size: 1.75rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #1d3477;
   margin: 0 0 0.75rem;
 }
 

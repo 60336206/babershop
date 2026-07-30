@@ -1,13 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700&display=swap');
 
 :host {
-  --navy-deep: #101b33;
-  --navy-mid: #16233f;
-  --navy-soft: #1e2d4d;
+  --navy-deep: #13224f;
+  --navy-mid: #1d3477;
+  --navy-soft: #294396;
   --cream: #fdfaf4;
   --cream-2: #f6efe1;
-  --gold: #eba63c;
-  --gold-light: #f6c874;
+  --gold: #f0282e;
+  --gold-light: #f95a5f;
   --ink: #1c2333;
   --muted: #6b7385;
   --muted-light: #9aa2b5;

@@ -1,6 +1,6 @@
 .toolbar-custom { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:1rem 1.25rem; }
 .page-header { display:flex; flex-direction:column; gap:.15rem; }
-.page-title  { font-size:1.25rem; font-weight:700; color:#0f172a; margin:0; display:flex; align-items:center; }
+.page-title  { font-size:1.25rem; font-weight:700; color:#1d3477; margin:0; display:flex; align-items:center; }
 .page-subtitle { font-size:.8rem; color:#64748b; margin:0; }
 
 .loading-state, .empty-state {

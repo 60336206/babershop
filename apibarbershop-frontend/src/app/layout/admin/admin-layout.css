@@ -13,7 +13,7 @@
 /* ══════════════ SIDEBAR ══════════════ */
 .admin-sidebar {
   width: var(--sidebar-w);
-  background: #0f172a;
+  background: #1d3477;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -41,7 +41,7 @@
 .brand-logo {
   width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+  background: linear-gradient(135deg, #f0282e, #d97706);
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -108,7 +108,7 @@
   transform: translateY(-50%);
   width: 3px;
   height: 60%;
-  background: #f59e0b;
+  background: #f0282e;
   border-radius: 3px 0 0 3px;
 }
 
@@ -188,7 +188,7 @@
 
 .breadcrumb-home { color: #94a3b8; }
 .breadcrumb-sep  { color: #cbd5e1; font-size: 0.75rem; }
-.breadcrumb-current { font-weight: 600; color: #0f172a; }
+.breadcrumb-current { font-weight: 600; color: #1d3477; }
 
 .topbar-right {
   display: flex;
@@ -212,7 +212,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #0f172a, #334155);
+  background: linear-gradient(135deg, #1d3477, #334155);
   color: #fff;
   font-size: 0.7rem;
   font-weight: 700;

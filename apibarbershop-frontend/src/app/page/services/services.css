@@ -1,6 +1,6 @@
 .toolbar-custom { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem 1.25rem; }
 .page-header { display: flex; flex-direction: column; gap: 0.15rem; }
-.page-title { font-size: 1.25rem; font-weight: 700; color: #0f172a; margin: 0; display: flex; align-items: center; }
+.page-title { font-size: 1.25rem; font-weight: 700; color: #1d3477; margin: 0; display: flex; align-items: center; }
 .page-subtitle { font-size: 0.8rem; color: #64748b; margin: 0; }
 
 /* ── Services Grid ── */
@@ -56,7 +56,7 @@
 .service-name {
   font-size: 1rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #1d3477;
   margin: 0 0 0.4rem;
 }
 
@@ -82,7 +82,7 @@
 
 .service-price { display: flex; flex-direction: column; gap: 0.1rem; }
 .price-label { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
-.price-value { font-size: 1.2rem; font-weight: 700; color: #0f172a; }
+.price-value { font-size: 1.2rem; font-weight: 700; color: #1d3477; }
 
 .service-duration {
   display: flex;
