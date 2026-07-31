@@ -1,4 +1,4 @@
 export const environment = {
-  production: true,
-  urlBase: 'https://api-barbershop-mifi.onrender.com'
+  production: false,
+  urlBase: 'http://localhost:8080'
 };

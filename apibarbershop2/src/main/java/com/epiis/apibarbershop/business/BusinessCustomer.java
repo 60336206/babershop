@@ -39,8 +39,8 @@ public class BusinessCustomer {
 			response.listMessage.add("El teléfono es obligatorio.");
 			return response;
 		}
-		if (!request.getPhone().matches("\\d{7,15}")) {
-			response.listMessage.add("El teléfono debe contener entre 7 y 15 dígitos.");
+		if (!request.getPhone().matches("\\d{9}")) {
+			response.listMessage.add("El teléfono debe tener exactamente 9 dígitos.");
 			return response;
 		}
 		if (repositoryCustomer.findByPhone(request.getPhone()).isPresent()) {
@@ -108,8 +108,8 @@ public class BusinessCustomer {
 			response.listMessage.add("El teléfono es obligatorio.");
 			return response;
 		}
-		if (!request.getPhone().matches("\\d{7,15}")) {
-			response.listMessage.add("El teléfono debe contener entre 7 y 15 dígitos.");
+		if (!request.getPhone().matches("\\d{9}")) {
+			response.listMessage.add("El teléfono debe tener exactamente 9 dígitos.");
 			return response;
 		}
 		Optional<EntityCustomer> optPhone = repositoryCustomer.findByPhone(request.getPhone());
@@ -161,9 +161,7 @@ public class BusinessCustomer {
 		}
 
 		EntityCustomer entity = optional.get();
-		entity.setStatus(EnumStatus.INACTIVE.getValue());
-		entity.setUpdatedAt(new Date());
-		repositoryCustomer.save(entity);
+		repositoryCustomer.delete(entity);
 
 		response.success();
 		response.listMessage.add("Cliente eliminado correctamente.");

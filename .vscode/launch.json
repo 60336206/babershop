@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-ApibarbershopApplication<apibarbershop>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.epiis.apibarbershop.ApibarbershopApplication",
+            "projectName": "apibarbershop",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
