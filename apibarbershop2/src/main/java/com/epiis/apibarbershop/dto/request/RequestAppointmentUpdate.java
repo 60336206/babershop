@@ -7,5 +7,7 @@ public class RequestAppointmentUpdate {
 	private String startHour;
 	private String endHour;
 	private String status;
+	private String paymentStatus;
+	private String paymentMethod;
 	private String observation;
 }

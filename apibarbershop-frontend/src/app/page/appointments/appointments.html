@@ -34,6 +34,7 @@
         <th>Barbero</th>
         <th pSortableColumn="total">Total <p-sortIcon field="total" /></th>
         <th pSortableColumn="status">Estado <p-sortIcon field="status" /></th>
+        <th>Pago</th>
         <th class="text-center" style="width:200px">Acciones</th>
       </tr>
     </ng-template>
@@ -77,6 +78,14 @@
             <p-tag [value]="apt.status" [severity]="getStatusSeverity(apt.status)" />
             @if(hasReferenceNote(apt)) {
               <i class="pi pi-image text-blue-400" pTooltip="Reserva con imagen de referencia"></i>
+            }
+          </div>
+        </td>
+        <td>
+          <div class="status-cell flex flex-col gap-1 items-start">
+            <p-tag [value]="apt.paymentStatus || 'Pendiente'" [severity]="apt.paymentStatus === 'Pagado' ? 'success' : 'warn'" />
+            @if(apt.paymentMethod) {
+              <span class="text-xs text-slate-500"><i class="pi pi-wallet text-[10px]"></i> {{apt.paymentMethod}}</span>
             }
           </div>
         </td>
@@ -236,7 +245,7 @@
       </div>
 
       <div class="form-field">
-        <label>Estado *</label>
+        <label>Estado Reserva *</label>
         <p-select
           [options]="statusOptions"
           formControlName="status"
@@ -248,6 +257,34 @@
         @if(statusFb.touched && statusFb.hasError('required')) {
           <small class="errorMessage">Seleccione un estado.</small>
         }
+      </div>
+
+      <div class="form-field">
+        <label>Estado Pago *</label>
+        <p-select
+          [options]="paymentStatusOptions"
+          formControlName="paymentStatus"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Seleccionar estado"
+          class="w-full"
+        />
+        @if(paymentStatusFb.touched && paymentStatusFb.hasError('required')) {
+          <small class="errorMessage">Seleccione un estado de pago.</small>
+        }
+      </div>
+
+      <div class="form-field form-field--full">
+        <label>Método de Pago</label>
+        <p-select
+          [options]="paymentMethodOptions"
+          formControlName="paymentMethod"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Seleccione método (opcional)"
+          class="w-full"
+          [showClear]="true"
+        />
       </div>
 
       <div class="form-field">

@@ -39,6 +39,12 @@ public class EntityAppointment {
 	(name = "status") 
 	private String status;
 	@Column
+	(name = "paymentStatus") 
+	private String paymentStatus;
+	@Column
+	(name = "paymentMethod") 
+	private String paymentMethod;
+	@Column
 	(name = "observation")
 	private String observation;
 	@Column

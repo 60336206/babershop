@@ -99,11 +99,25 @@ export class Appointments implements OnInit {
     { label: 'Pendiente',   value: 'Pendiente' },
     { label: 'Confirmada',  value: 'Confirmada' },
     { label: 'Cancelada',   value: 'Cancelada' },
-    { label: 'Finalizada',  value: 'Finalizada' }
+    { label: 'Completada',  value: 'Completada' }
   ];
 
-  get statusFb()      { return this.frmEdit.controls['status']; }
-  get observationFb() { return this.frmEdit.controls['observation']; }
+  paymentStatusOptions = [
+    { label: 'Pendiente', value: 'Pendiente' },
+    { label: 'Pagado',    value: 'Pagado' }
+  ];
+
+  paymentMethodOptions = [
+    { label: 'Efectivo', value: 'Efectivo' },
+    { label: 'Yape',     value: 'Yape' },
+    { label: 'Plin',     value: 'Plin' },
+    { label: 'Tarjeta',  value: 'Tarjeta' }
+  ];
+
+  get statusFb()        { return this.frmEdit.controls['status']; }
+  get paymentStatusFb() { return this.frmEdit.controls['paymentStatus']; }
+  get paymentMethodFb() { return this.frmEdit.controls['paymentMethod']; }
+  get observationFb()   { return this.frmEdit.controls['observation']; }
 
   constructor() {
     this.frmEdit = this.formBuilder.group({
@@ -112,6 +126,8 @@ export class Appointments implements OnInit {
       startHour:       [''],
       endHour:         [''],
       status:          ['', [Validators.required]],
+      paymentStatus:   ['', [Validators.required]],
+      paymentMethod:   [''],
       observation:     ['']
     });
   }
@@ -174,6 +190,8 @@ export class Appointments implements OnInit {
       startHour:       appointment.startHour,
       endHour:         appointment.endHour,
       status:          appointment.status,
+      paymentStatus:   appointment.paymentStatus || 'Pendiente',
+      paymentMethod:   appointment.paymentMethod || '',
       observation:     appointment.observation ?? ''
     });
     this.editVisible = true;
@@ -182,7 +200,7 @@ export class Appointments implements OnInit {
   saveEdit(): void {
     if (!this.frmEdit.valid) {
       this.frmEdit.markAllAsTouched();
-      this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'Seleccione un estado.' });
+      this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'Complete los campos obligatorios.' });
       return;
     }
 
@@ -196,6 +214,8 @@ export class Appointments implements OnInit {
         startHour:       v.startHour,
         endHour:         v.endHour,
         status:          v.status,
+        paymentStatus:   v.paymentStatus,
+        paymentMethod:   v.paymentMethod,
         observation:     v.observation ?? ''
       }
     }).then((response: any) => {
@@ -220,6 +240,8 @@ export class Appointments implements OnInit {
         startHour:       appointment.startHour,
         endHour:         appointment.endHour,
         status:          newStatus,
+        paymentStatus:   appointment.paymentStatus,
+        paymentMethod:   appointment.paymentMethod,
         observation:     appointment.observation ?? ''
       }
     }).then((response: any) => {

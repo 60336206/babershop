@@ -103,6 +103,8 @@ CREATE TABLE tappointment(
     endHour TIME NOT NULL,
     total DECIMAL(10,2) NOT NULL,
     status VARCHAR(50) NOT NULL,
+    paymentStatus VARCHAR(50) DEFAULT 'Pendiente',
+    paymentMethod VARCHAR(50) NULL,
     observation VARCHAR(1000) NULL,
     createdAt DATETIME NOT NULL,
     updatedAt DATETIME NOT NULL,

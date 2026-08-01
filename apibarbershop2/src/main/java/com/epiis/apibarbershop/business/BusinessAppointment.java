@@ -110,6 +110,7 @@ public class BusinessAppointment {
 		entity.setEndHour(Time.valueOf(endHourStr));
 		entity.setTotal(request.getTotal());
 		entity.setStatus(EnumAppointmentStatus.PENDING.toString());
+		entity.setPaymentStatus("Pendiente");
 		entity.setObservation(request.getObservation());
 		entity.setCreatedAt(now);
 		entity.setUpdatedAt(now);
@@ -219,6 +220,12 @@ public class BusinessAppointment {
 
 		if (request.getStatus() != null) {
 			entity.setStatus(request.getStatus());
+		}
+		if (request.getPaymentStatus() != null) {
+			entity.setPaymentStatus(request.getPaymentStatus());
+		}
+		if (request.getPaymentMethod() != null) {
+			entity.setPaymentMethod(request.getPaymentMethod());
 		}
 		entity.setObservation(request.getObservation());
 		entity.setUpdatedAt(new java.util.Date());
