@@ -28,12 +28,12 @@ public class BusinessCustomer {
 		ResponseCustomerInsert response = new ResponseCustomerInsert();
 
 		// 1. Validar Nombres y Apellidos
-		if (request.getFirstName() == null || request.getFirstName().trim().isEmpty()) {
-			response.listMessage.add("El nombre es obligatorio.");
+		if (request.getFirstName() == null || request.getFirstName().trim().length() < 3) {
+			response.listMessage.add("El nombre es obligatorio y debe tener al menos 3 caracteres.");
 			return response;
 		}
-		if (request.getSurName() == null || request.getSurName().trim().isEmpty()) {
-			response.listMessage.add("El apellido es obligatorio.");
+		if (request.getSurName() == null || request.getSurName().trim().length() < 3) {
+			response.listMessage.add("El apellido es obligatorio y debe tener al menos 3 caracteres.");
 			return response;
 		}
 
@@ -97,12 +97,12 @@ public class BusinessCustomer {
 		EntityCustomer entity = optional.get();
 
 		// 1. Validar Nombres y Apellidos
-		if (request.getFirstName() == null || request.getFirstName().trim().isEmpty()) {
-			response.listMessage.add("El nombre es obligatorio.");
+		if (request.getFirstName() == null || request.getFirstName().trim().length() < 3) {
+			response.listMessage.add("El nombre es obligatorio y debe tener al menos 3 caracteres.");
 			return response;
 		}
-		if (request.getSurName() == null || request.getSurName().trim().isEmpty()) {
-			response.listMessage.add("El apellido es obligatorio.");
+		if (request.getSurName() == null || request.getSurName().trim().length() < 3) {
+			response.listMessage.add("El apellido es obligatorio y debe tener al menos 3 caracteres.");
 			return response;
 		}
 

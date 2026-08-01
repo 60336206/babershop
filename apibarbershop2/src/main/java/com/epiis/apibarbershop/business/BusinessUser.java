@@ -41,17 +41,17 @@ public class BusinessUser {
 		ResponseUserInsert response = new ResponseUserInsert();
 
 		// Validaciones obligatorias
-		if (request.getFirstName() == null || request.getFirstName().trim().isEmpty()) {
-			response.listMessage.add("El nombre es obligatorio.");
+		if (request.getFirstName() == null || request.getFirstName().trim().length() < 3) {
+			response.listMessage.add("El nombre es obligatorio y debe tener al menos 3 caracteres.");
 		}
-		if (request.getSurName() == null || request.getSurName().trim().isEmpty()) {
-			response.listMessage.add("El apellido es obligatorio.");
+		if (request.getSurName() == null || request.getSurName().trim().length() < 3) {
+			response.listMessage.add("El apellido es obligatorio y debe tener al menos 3 caracteres.");
 		}
 		if (request.getEmail() == null || !request.getEmail().matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
 			response.listMessage.add("Correo electrónico inválido o vacío.");
 		}
-		if (request.getPassword() == null || request.getPassword().length() < 6) {
-			response.listMessage.add("La contraseña debe tener al menos 6 caracteres.");
+		if (request.getPassword() == null || !request.getPassword().matches("^(?=.*[A-Z])(?=.*\\d).{6,}$")) {
+			response.listMessage.add("La contraseña debe tener al menos 6 caracteres, 1 mayúscula y 1 número.");
 		}
 		if (request.getRole() == null || (!request.getRole().equals("ADMIN") && !request.getRole().equals("BARBER"))) {
 			response.listMessage.add("El rol debe ser ADMIN o BARBER.");
@@ -110,11 +110,11 @@ public class BusinessUser {
 		}
 
 		// Validaciones obligatorias
-		if (request.getFirstName() == null || request.getFirstName().trim().isEmpty()) {
-			response.listMessage.add("El nombre es obligatorio.");
+		if (request.getFirstName() == null || request.getFirstName().trim().length() < 3) {
+			response.listMessage.add("El nombre es obligatorio y debe tener al menos 3 caracteres.");
 		}
-		if (request.getSurName() == null || request.getSurName().trim().isEmpty()) {
-			response.listMessage.add("El apellido es obligatorio.");
+		if (request.getSurName() == null || request.getSurName().trim().length() < 3) {
+			response.listMessage.add("El apellido es obligatorio y debe tener al menos 3 caracteres.");
 		}
 		if (request.getEmail() == null || !request.getEmail().matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
 			response.listMessage.add("Correo electrónico inválido o vacío.");

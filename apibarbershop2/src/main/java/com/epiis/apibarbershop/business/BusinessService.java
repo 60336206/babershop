@@ -39,10 +39,18 @@ public class BusinessService {
 			response.listMessage.add("El precio debe ser mayor a 0.");
 			return response;
 		}
+		if (request.getPrice().compareTo(new java.math.BigDecimal("1000")) > 0) {
+			response.listMessage.add("El precio máximo permitido es 1000.");
+			return response;
+		}
 
 		// 3. Validar Duración
 		if (request.getDurationMinutes() == null || request.getDurationMinutes() <= 0) {
 			response.listMessage.add("La duración debe ser mayor a 0 minutos.");
+			return response;
+		}
+		if (request.getDurationMinutes() > 300) {
+			response.listMessage.add("La duración máxima permitida es de 300 minutos (5 horas).");
 			return response;
 		}
 
@@ -91,10 +99,18 @@ public class BusinessService {
 			response.listMessage.add("El precio debe ser mayor a 0.");
 			return response;
 		}
+		if (request.getPrice().compareTo(new java.math.BigDecimal("1000")) > 0) {
+			response.listMessage.add("El precio máximo permitido es 1000.");
+			return response;
+		}
 
 		// 3. Validar Duración
 		if (request.getDurationMinutes() == null || request.getDurationMinutes() <= 0) {
 			response.listMessage.add("La duración debe ser mayor a 0 minutos.");
+			return response;
+		}
+		if (request.getDurationMinutes() > 300) {
+			response.listMessage.add("La duración máxima permitida es de 300 minutos (5 horas).");
 			return response;
 		}
 
