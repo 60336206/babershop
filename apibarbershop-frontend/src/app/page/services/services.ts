@@ -49,6 +49,8 @@ function apiservicedelete(http: HttpClient, rootUrl: string, params: { idService
   );
 }
 
+import { noWhitespaceValidator } from '../../shared/validators/no-whitespace.validator';
+
 @Component({
   selector: 'app-services',
   standalone: true,
@@ -58,8 +60,8 @@ function apiservicedelete(http: HttpClient, rootUrl: string, params: { idService
     ButtonModule,
     DialogModule,
     InputTextModule,
-    TextareaModule,
     InputNumberModule,
+    TextareaModule,
     TagModule,
     ToolbarModule,
     TooltipModule,
@@ -101,8 +103,8 @@ export class Services implements OnInit {
   constructor() {
     this.frmService = this.formBuilder.group({
       idService:       [''],
-      name:            ['', [Validators.required]],
-      description:     ['', [Validators.required]],
+      name:            ['', [Validators.required, noWhitespaceValidator]],
+      description:     ['', [Validators.required, noWhitespaceValidator]],
       price:           [null, [Validators.required, Validators.min(0.01)]],
       durationMinutes: [null, [Validators.required, Validators.min(1)]],
       image:           [''],
@@ -124,6 +126,30 @@ export class Services implements OnInit {
     }).catch(() => {
       this.loading = false;
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar los servicios.' });
+    });
+  }
+
+  toggleStatus(service: any): void {
+    const newStatus = service.status === 1 ? 0 : 1;
+    const body = {
+      idService: service.idService,
+      name: service.name,
+      description: service.description,
+      price: service.price,
+      durationMinutes: service.durationMinutes,
+      status: newStatus,
+      image: '' // BusinessService retains old image if empty
+    };
+    
+    this.api.invoke(apiserviceupdate as any, { body }).then((res: any) => {
+      const data = typeof res === 'string' ? JSON.parse(res) : res;
+      if (data?.type === 'success') {
+        service.status = newStatus;
+        this.messageService.add({ severity: 'success', summary: 'Correcto', detail: 'Estado actualizado.' });
+        this.cdr.detectChanges();
+      } else {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar el estado.' });
+      }
     });
   }
 

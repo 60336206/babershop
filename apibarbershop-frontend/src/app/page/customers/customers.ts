@@ -38,6 +38,8 @@ function apicustomerdelete(http: HttpClient, rootUrl: string, params: { idCustom
   );
 }
 
+import { noWhitespaceValidator } from '../../shared/validators/no-whitespace.validator';
+
 @Component({
   selector: 'app-customers',
   standalone: true,
@@ -88,10 +90,10 @@ export class Customers implements OnInit {
   constructor() {
     this.frmCustomer = this.formBuilder.group({
       idCustomer: [''],
-      firstName:  ['', [Validators.required]],
-      surName:    ['', [Validators.required]],
-      phone:      ['', [Validators.required, Validators.pattern(/^\d{7,15}$/)]],
-      email:      ['', [Validators.email]],
+      firstName:  ['', [Validators.required, noWhitespaceValidator]],
+      surName:    ['', [Validators.required, noWhitespaceValidator]],
+      phone:      ['', [Validators.required, Validators.pattern(/^\d{9}$/), noWhitespaceValidator]],
+      email:      ['', [Validators.email, noWhitespaceValidator]],
       status:     [1]
     });
   }
@@ -111,6 +113,35 @@ export class Customers implements OnInit {
       this.loading = false;
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar el listado de clientes.' });
     });
+  }
+
+  toggleStatus(customer: any): void {
+    const newStatus = customer.status === 1 ? 0 : 1;
+    const body = {
+      idCustomer: customer.idCustomer,
+      firstName: customer.firstName,
+      surName: customer.surName,
+      phone: customer.phone,
+      email: customer.email,
+      status: newStatus
+    };
+    
+    this.api.invoke(apicustomerupdate as any, { body }).then((res: any) => {
+      const data = typeof res === 'string' ? JSON.parse(res) : res;
+      if (data?.type === 'success') {
+        customer.status = newStatus;
+        this.messageService.add({ severity: 'success', summary: 'Correcto', detail: 'Estado actualizado.' });
+        this.cdr.detectChanges();
+      } else {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar el estado.' });
+      }
+    });
+  }
+
+  hideDialog(): void {
+    this.isEditing = false;
+    this.frmCustomer.reset();
+    this.dialogVisible = true;
   }
 
   openNew(): void {

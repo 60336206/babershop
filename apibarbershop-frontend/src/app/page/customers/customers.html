@@ -72,10 +72,21 @@
         </td>
         <td class="text-slate-500 text-sm">{{ customer.email || '—' }}</td>
         <td>
-          <p-tag
-            [value]="customer.status === 1 ? 'Activo' : 'Inactivo'"
-            [severity]="getStatusSeverity(customer.status)"
-          />
+          <div class="flex align-items-center gap-2">
+            <p-tag
+              [value]="customer.status === 1 ? 'Activo' : 'Inactivo'"
+              [severity]="getStatusSeverity(customer.status)"
+            />
+            <p-button
+              [icon]="customer.status === 1 ? 'pi pi-power-off' : 'pi pi-check'"
+              [rounded]="true"
+              [text]="true"
+              size="small"
+              [severity]="customer.status === 1 ? 'danger' : 'success'"
+              (click)="toggleStatus(customer)"
+              pTooltip="Cambiar estado"
+            />
+          </div>
         </td>
         <td>
           <div class="flex gap-2 justify-center">
@@ -132,7 +143,7 @@
           <small class="errorMessage">Campo requerido.</small>
         }
         @if(phoneFb.touched && phoneFb.hasError('pattern')) {
-          <small class="errorMessage">Solo números, mínimo 7 dígitos.</small>
+          <small class="errorMessage">Debe ser exactamente 9 dígitos.</small>
         }
       </div>
 

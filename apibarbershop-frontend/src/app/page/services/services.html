@@ -52,10 +52,21 @@
 
         <!-- Badge estado -->
         <div class="service-card-status">
-          <p-tag
-            [value]="service.status === 1 ? 'Activo' : 'Inactivo'"
-            [severity]="getStatusSeverity(service.status)"
-          />
+          <div class="flex align-items-center gap-2">
+            <p-tag
+              [value]="service.status === 1 ? 'Activo' : 'Inactivo'"
+              [severity]="getStatusSeverity(service.status)"
+            />
+            <p-button
+              [icon]="service.status === 1 ? 'pi pi-power-off' : 'pi pi-check'"
+              [rounded]="true"
+              [text]="true"
+              size="small"
+              [severity]="service.status === 1 ? 'danger' : 'success'"
+              (click)="toggleStatus(service)"
+              pTooltip="Cambiar estado"
+            />
+          </div>
         </div>
 
         <!-- Cuerpo -->

@@ -19,18 +19,21 @@ import com.epiis.apibarbershop.dto.request.RequestUserUpdate;
 import com.epiis.apibarbershop.dto.response.*;
 import com.epiis.apibarbershop.entity.EntityUser;
 import com.epiis.apibarbershop.repository.RepositoryUser;
+import com.epiis.apibarbershop.repository.RepositoryCustomer;
 import com.epiis.apibarbershop.staticdata.EnumStatus;
 
 @Service
 public class BusinessUser {
 	private final RepositoryUser repositoryUser;
+	private final RepositoryCustomer repositoryCustomer;
 	private final PasswordEncoder passwordEncoder;
 
 	@Value("${upload.users.path:uploads/users/}")
 	private String uploadUsersPath;
 
-	public BusinessUser(RepositoryUser repositoryUser, PasswordEncoder passwordEncoder) {
+	public BusinessUser(RepositoryUser repositoryUser, RepositoryCustomer repositoryCustomer, PasswordEncoder passwordEncoder) {
 		this.repositoryUser = repositoryUser;
+		this.repositoryCustomer = repositoryCustomer;
 		this.passwordEncoder = passwordEncoder;
 	}
 
@@ -61,13 +64,13 @@ public class BusinessUser {
 			return response;
 		}
 
-		if (repositoryUser.findByEmail(request.getEmail()).isPresent()) {
-			response.listMessage.add("El correo ya está registrado.");
+		if (repositoryUser.findByEmail(request.getEmail()).isPresent() || repositoryCustomer.findByEmail(request.getEmail()).isPresent()) {
+			response.listMessage.add("El correo ya está registrado en el sistema.");
 			return response;
 		}
 
-		if (repositoryUser.findByPhone(request.getPhone()).isPresent()) {
-			response.listMessage.add("El teléfono ya está registrado.");
+		if (repositoryUser.findByPhone(request.getPhone()).isPresent() || repositoryCustomer.findByPhone(request.getPhone()).isPresent()) {
+			response.listMessage.add("El teléfono ya está registrado en el sistema.");
 			return response;
 		}
 
@@ -130,13 +133,21 @@ public class BusinessUser {
 		// Validar si email o phone pertenecen a OTRO usuario
 		Optional<EntityUser> existingEmail = repositoryUser.findByEmail(request.getEmail());
 		if (existingEmail.isPresent() && !existingEmail.get().getIdUser().equals(request.getIdUser())) {
-			response.listMessage.add("El correo ya está registrado por otro usuario.");
+			response.listMessage.add("El correo ya está registrado en el sistema.");
+			return response;
+		}
+		if (repositoryCustomer.findByEmail(request.getEmail()).isPresent()) {
+			response.listMessage.add("El correo ya está registrado en el sistema.");
 			return response;
 		}
 
 		Optional<EntityUser> existingPhone = repositoryUser.findByPhone(request.getPhone());
 		if (existingPhone.isPresent() && !existingPhone.get().getIdUser().equals(request.getIdUser())) {
-			response.listMessage.add("El teléfono ya está registrado por otro usuario.");
+			response.listMessage.add("El teléfono ya está registrado en el sistema.");
+			return response;
+		}
+		if (repositoryCustomer.findByPhone(request.getPhone()).isPresent()) {
+			response.listMessage.add("El teléfono ya está registrado en el sistema.");
 			return response;
 		}
 

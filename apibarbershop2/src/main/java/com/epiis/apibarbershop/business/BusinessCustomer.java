@@ -11,14 +11,17 @@ import com.epiis.apibarbershop.dto.request.RequestCustomerUpdate;
 import com.epiis.apibarbershop.dto.response.*;
 import com.epiis.apibarbershop.entity.EntityCustomer;
 import com.epiis.apibarbershop.repository.RepositoryCustomer;
+import com.epiis.apibarbershop.repository.RepositoryUser;
 import com.epiis.apibarbershop.staticdata.EnumStatus;
 
 @Service
 public class BusinessCustomer {
 	private final RepositoryCustomer repositoryCustomer;
+	private final RepositoryUser repositoryUser;
 
-	public BusinessCustomer(RepositoryCustomer repositoryCustomer) {
+	public BusinessCustomer(RepositoryCustomer repositoryCustomer, RepositoryUser repositoryUser) {
 		this.repositoryCustomer = repositoryCustomer;
+		this.repositoryUser = repositoryUser;
 	}
 
 	public ResponseCustomerInsert insert(RequestCustomerInsert request) {
@@ -43,8 +46,8 @@ public class BusinessCustomer {
 			response.listMessage.add("El teléfono debe tener exactamente 9 dígitos.");
 			return response;
 		}
-		if (repositoryCustomer.findByPhone(request.getPhone()).isPresent()) {
-			response.listMessage.add("Ya existe un cliente con este teléfono.");
+		if (repositoryCustomer.findByPhone(request.getPhone()).isPresent() || repositoryUser.findByPhone(request.getPhone()).isPresent()) {
+			response.listMessage.add("El teléfono ya está registrado en el sistema.");
 			return response;
 		}
 
@@ -55,8 +58,8 @@ public class BusinessCustomer {
 				response.listMessage.add("El formato del correo electrónico es inválido.");
 				return response;
 			}
-			if (repositoryCustomer.findByEmail(email).isPresent()) {
-				response.listMessage.add("Ya existe un cliente con este correo.");
+			if (repositoryCustomer.findByEmail(email).isPresent() || repositoryUser.findByEmail(email).isPresent()) {
+				response.listMessage.add("El correo ya está registrado en el sistema.");
 				return response;
 			}
 		} else {
@@ -114,7 +117,11 @@ public class BusinessCustomer {
 		}
 		Optional<EntityCustomer> optPhone = repositoryCustomer.findByPhone(request.getPhone());
 		if (optPhone.isPresent() && !optPhone.get().getIdCustomer().equals(entity.getIdCustomer())) {
-			response.listMessage.add("Ya existe otro cliente con este teléfono.");
+			response.listMessage.add("El teléfono ya está registrado en el sistema.");
+			return response;
+		}
+		if (repositoryUser.findByPhone(request.getPhone()).isPresent()) {
+			response.listMessage.add("El teléfono ya está registrado en el sistema.");
 			return response;
 		}
 
@@ -127,7 +134,11 @@ public class BusinessCustomer {
 			}
 			Optional<EntityCustomer> optEmail = repositoryCustomer.findByEmail(email);
 			if (optEmail.isPresent() && !optEmail.get().getIdCustomer().equals(entity.getIdCustomer())) {
-				response.listMessage.add("Ya existe otro cliente con este correo.");
+				response.listMessage.add("El correo ya está registrado en el sistema.");
+				return response;
+			}
+			if (repositoryUser.findByEmail(email).isPresent()) {
+				response.listMessage.add("El correo ya está registrado en el sistema.");
 				return response;
 			}
 		} else {

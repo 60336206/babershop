@@ -91,10 +91,21 @@
           <p-tag [value]="user.role" [severity]="getRoleSeverity(user.role)" />
         </td>
         <td>
-          <p-tag
-            [value]="user.status === 1 ? 'Activo' : 'Inactivo'"
-            [severity]="getStatusSeverity(user.status)"
-          />
+          <div class="flex align-items-center gap-2">
+            <p-tag
+              [value]="user.status === 1 ? 'Activo' : 'Inactivo'"
+              [severity]="getStatusSeverity(user.status)"
+            />
+            <p-button
+              [icon]="user.status === 1 ? 'pi pi-power-off' : 'pi pi-check'"
+              [rounded]="true"
+              [text]="true"
+              size="small"
+              [severity]="user.status === 1 ? 'danger' : 'success'"
+              (click)="toggleStatus(user)"
+              pTooltip="Cambiar estado"
+            />
+          </div>
         </td>
         <td>
           <div class="flex gap-2 justify-center">
@@ -176,10 +187,7 @@
           <small class="errorMessage">Campo requerido.</small>
         }
         @if(phoneFb.touched && phoneFb.hasError('pattern')) {
-          <small class="errorMessage">Solo se permiten números y el símbolo +.</small>
-        }
-        @if(phoneFb.touched && phoneFb.hasError('minlength')) {
-          <small class="errorMessage">Mínimo 7 dígitos.</small>
+          <small class="errorMessage">Debe ser exactamente 9 dígitos.</small>
         }
       </div>
 

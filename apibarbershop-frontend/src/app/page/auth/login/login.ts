@@ -12,6 +12,8 @@ import { Api } from '../../../api/api';
 import { apiauthlogin, ApiauthloginParams, apisettinggetone } from '../../../api/functions';
 import { AuthService } from '../../../observable/auth/auth.service';
 
+import { noWhitespaceValidator } from '../../../shared/validators/no-whitespace.validator';
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -40,8 +42,8 @@ export class Login implements OnInit {
 
   constructor() {
     this.frmLogin = this.formBuilder.group({
-      email:    ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(3)]]
+      email:    ['', [Validators.required, Validators.email, noWhitespaceValidator]],
+      password: ['', [Validators.required, Validators.minLength(3), noWhitespaceValidator]]
     });
   }
 

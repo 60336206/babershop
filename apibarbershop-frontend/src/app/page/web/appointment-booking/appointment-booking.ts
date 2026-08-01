@@ -41,6 +41,8 @@ function apibarberscheduleavailablehours(http: HttpClient, rootUrl: string, para
   );
 }
 
+import { noWhitespaceValidator } from '../../../shared/validators/no-whitespace.validator';
+
 @Component({
   selector: 'app-appointment-booking',
   standalone: true,
@@ -58,6 +60,7 @@ function apibarberscheduleavailablehours(http: HttpClient, rootUrl: string, para
     TagModule,
     DividerModule
   ],
+  providers: [MessageService],
   templateUrl: './appointment-booking.html',
   styleUrl: './appointment-booking.css'
 })
@@ -112,10 +115,10 @@ export class AppointmentBooking implements OnInit {
 
   constructor() {
     this.frmCustomer = this.formBuilder.group({
-      firstName: ['', [Validators.required]],
-      surName:   ['', [Validators.required]],
-      phone:     ['', [Validators.required, Validators.pattern(/^\d{7,15}$/)]],
-      email:     ['', [Validators.email]]
+      firstName: ['', [Validators.required, noWhitespaceValidator]],
+      surName:   ['', [Validators.required, noWhitespaceValidator]],
+      phone:     ['', [Validators.required, Validators.pattern(/^\d{9}$/), noWhitespaceValidator]],
+      email:     ['', [Validators.email, noWhitespaceValidator]]
     });
 
     this.frmAppointment = this.formBuilder.group({

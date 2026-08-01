@@ -26,6 +26,8 @@ function apisettingupdate(http: HttpClient, rootUrl: string, params: { body: any
   );
 }
 
+import { noWhitespaceValidator } from '../../shared/validators/no-whitespace.validator';
+
 @Component({
   selector: 'app-settings',
   standalone: true,
@@ -54,9 +56,9 @@ export class Settings implements OnInit {
 
   constructor() {
     this.frmSettings = this.fb.group({
-      businessName: ['', Validators.required],
+      businessName: ['', [Validators.required, noWhitespaceValidator]],
       address: [''],
-      phone: [''],
+      phone: ['', [Validators.pattern(/^\d{9}$/)]],
       email: [''],
       openHour: [''],
       closeHour: ['']

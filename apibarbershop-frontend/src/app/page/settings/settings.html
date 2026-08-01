@@ -55,6 +55,9 @@
           <div class="field col-half">
             <label for="phone" class="font-semibold block mb-2">Teléfono</label>
             <input pInputText id="phone" formControlName="phone" class="w-full" placeholder="Ej: 999111222" />
+            @if(frmSettings.get('phone')?.touched && frmSettings.get('phone')?.hasError('pattern')) {
+              <small class="text-red-500 block mt-1">Debe ser exactamente 9 dígitos.</small>
+            }
           </div>
 
           <div class="field col-half">

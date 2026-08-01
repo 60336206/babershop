@@ -50,6 +50,8 @@ function apiuserdelete(http: HttpClient, rootUrl: string, params: { idUser: stri
   );
 }
 
+import { noWhitespaceValidator } from '../../shared/validators/no-whitespace.validator';
+
 @Component({
   selector: 'app-users',
   standalone: true,
@@ -111,11 +113,11 @@ export class Users implements OnInit {
   constructor() {
     this.frmUser = this.formBuilder.group({
       idUser:    [''],
-      firstName: ['', [Validators.required]],
-      surName:   ['', [Validators.required]],
-      email:     ['', [Validators.required, Validators.email]],
-      phone:     ['', [Validators.required, Validators.pattern('^[0-9+]*$'), Validators.minLength(7)]],
-      password:  ['', [Validators.minLength(6)]],
+      firstName: ['', [Validators.required, noWhitespaceValidator]],
+      surName:   ['', [Validators.required, noWhitespaceValidator]],
+      email:     ['', [Validators.required, Validators.email, noWhitespaceValidator]],
+      phone:     ['', [Validators.required, Validators.pattern(/^\d{9}$/), noWhitespaceValidator]],
+      password:  ['', [Validators.minLength(6), noWhitespaceValidator]],
       role:      ['', [Validators.required]],
       status:    [1]
     });
@@ -166,6 +168,30 @@ export class Users implements OnInit {
     this.passwordFb.clearValidators();
     this.passwordFb.updateValueAndValidity();
     this.dialogVisible = true;
+  }
+
+  toggleStatus(user: any): void {
+    const newStatus = user.status === 1 ? 0 : 1;
+    const body = {
+      idUser: user.idUser,
+      firstName: user.firstName,
+      surName: user.surName,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+      status: newStatus
+    };
+    
+    this.api.invoke(apiuserupdate as any, { body }).then((res: any) => {
+      const data = typeof res === 'string' ? JSON.parse(res) : res;
+      if (data?.type === 'success') {
+        user.status = newStatus;
+        this.messageService.add({ severity: 'success', summary: 'Correcto', detail: 'Estado actualizado.' });
+        this.cdr.detectChanges();
+      } else {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar el estado.' });
+      }
+    });
   }
 
   onPhotoSelected(event: any): void {
