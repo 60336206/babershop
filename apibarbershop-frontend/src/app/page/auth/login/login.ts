@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -9,7 +9,7 @@ import { ButtonModule } from 'primeng/button';
 import { MessageService } from 'primeng/api';
 
 import { Api } from '../../../api/api';
-import { apiauthlogin, ApiauthloginParams } from '../../../api/functions';
+import { apiauthlogin, ApiauthloginParams, apisettinggetone } from '../../../api/functions';
 import { AuthService } from '../../../observable/auth/auth.service';
 
 @Component({
@@ -25,7 +25,7 @@ import { AuthService } from '../../../observable/auth/auth.service';
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
-export class Login {
+export class Login implements OnInit {
   private readonly formBuilder   = inject(FormBuilder);
   private readonly router        = inject(Router);
   private readonly api           = inject(Api);
@@ -42,6 +42,16 @@ export class Login {
     this.frmLogin = this.formBuilder.group({
       email:    ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(3)]]
+    });
+  }
+
+  logoBase64: string = 'logo.png';
+  ngOnInit(): void {
+    (this.api.invoke(apisettinggetone as any, {}) as Promise<any>).then((res: any) => {
+      const data = typeof res === 'string' ? JSON.parse(res) : res;
+      if (data?.type === 'success' && data.setting?.logo) {
+        this.logoBase64 = data.setting.logo;
+      }
     });
   }
 

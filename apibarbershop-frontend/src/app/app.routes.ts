@@ -55,6 +55,10 @@ export const routes: Routes = [
         path: 'gallery',
         loadComponent: () => import('./page/gallery/gallery').then(m => m.Gallery)
       },
+      {
+        path: 'settings',
+        loadComponent: () => import('./page/settings/settings').then(m => m.Settings)
+      },
     ]
   },
 

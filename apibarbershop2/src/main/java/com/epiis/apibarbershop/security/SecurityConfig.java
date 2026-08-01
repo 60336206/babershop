@@ -72,7 +72,6 @@ public class SecurityConfig {
 				.requestMatchers("/user/delete/**").hasAuthority("ROLE_ADMIN")
 				.requestMatchers("/user/upload-photo/**").hasAuthority("ROLE_ADMIN")
 				.requestMatchers("/customer/**").hasAuthority("ROLE_ADMIN")
-				.requestMatchers("/payment/**").hasAuthority("ROLE_ADMIN")
 				.requestMatchers("/service/insert").hasAuthority("ROLE_ADMIN")
 				.requestMatchers("/service/update").hasAuthority("ROLE_ADMIN")
 				.requestMatchers("/service/delete/**").hasAuthority("ROLE_ADMIN")

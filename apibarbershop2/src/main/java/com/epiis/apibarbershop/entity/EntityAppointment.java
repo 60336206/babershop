@@ -65,10 +65,6 @@ public class EntityAppointment {
 	(mappedBy = "parentAppointment", cascade = CascadeType.ALL)
 	private List<EntityAppointmentDetail> childAppointmentDetail;
 
-	@com.fasterxml.jackson.annotation.JsonIgnore
-	@OneToMany
-	(mappedBy = "parentAppointment", cascade = CascadeType.ALL)
-	private List<EntityPayment> childPayment;
 
 	@com.fasterxml.jackson.annotation.JsonIgnore
 	@OneToMany

@@ -40,8 +40,11 @@ public class BusinessSetting {
 		entity.setPhone(request.getPhone());
 		entity.setEmail(request.getEmail());
 		entity.setLogo(request.getLogo());
-		entity.setOpenHour(Time.valueOf(request.getOpenHour()));
-		entity.setCloseHour(Time.valueOf(request.getCloseHour()));
+		String openH = request.getOpenHour() != null && request.getOpenHour().length() == 5 ? request.getOpenHour() + ":00" : request.getOpenHour();
+		String closeH = request.getCloseHour() != null && request.getCloseHour().length() == 5 ? request.getCloseHour() + ":00" : request.getCloseHour();
+		
+		entity.setOpenHour(openH != null && !openH.isEmpty() ? Time.valueOf(openH) : null);
+		entity.setCloseHour(closeH != null && !closeH.isEmpty() ? Time.valueOf(closeH) : null);
 		entity.setUpdatedAt(new Date());
 
 		repositorySetting.save(entity);

@@ -12,6 +12,8 @@ import { TooltipModule } from 'primeng/tooltip';
 import { MenuItem } from 'primeng/api';
 
 import { AuthService } from '../../observable/auth/auth.service';
+import { Api } from '../../api/api';
+import { apisettinggetone } from '../../api/functions';
 
 interface NavItem {
   label: string;
@@ -37,11 +39,13 @@ interface NavItem {
 export class AdminLayout implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly router      = inject(Router);
+  private readonly api         = inject(Api);
   private routerSub!: Subscription;
 
   user = this.authService.getUser();
   sidebarCollapsed = false;
   currentRoute = '';
+  logoBase64: string = 'logo.png';
 
   navItems: NavItem[] = [];
 
@@ -50,6 +54,13 @@ export class AdminLayout implements OnInit, OnDestroy {
   ];
 
   ngOnInit(): void {
+    (this.api.invoke(apisettinggetone as any, {}) as Promise<any>).then((res: any) => {
+      const data = typeof res === 'string' ? JSON.parse(res) : res;
+      if (data?.type === 'success' && data.setting?.logo) {
+        this.logoBase64 = data.setting.logo;
+      }
+    });
+
     const allNavItems: NavItem[] = [
       { label: 'Dashboard',  icon: 'pi-chart-bar',   route: '/dashboard' },
       { label: 'Usuarios',   icon: 'pi-users',        route: '/users' },
@@ -58,6 +69,7 @@ export class AdminLayout implements OnInit, OnDestroy {
       { label: 'Reservas',   icon: 'pi-calendar',     route: '/appointments' },
       { label: 'Horarios',   icon: 'pi-clock',        route: '/schedules' },
       { label: 'Galería',    icon: 'pi-images',       route: '/gallery' },
+      { label: 'Configuración', icon: 'pi-cog',       route: '/settings' },
     ];
 
     if (this.user?.role === 'BARBER') {

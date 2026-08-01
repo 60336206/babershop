@@ -1,0 +1,90 @@
+<p-toast></p-toast>
+<div class="settings-container">
+  <div class="page-header">
+    <h2 class="page-title">Configuración de la Barbería</h2>
+    <p class="page-subtitle">Gestiona la información pública de tu negocio.</p>
+  </div>
+
+  @if (loading) {
+    <div class="flex align-items-center justify-content-center p-5">
+      <i class="pi pi-spin pi-spinner" style="font-size: 2rem"></i>
+    </div>
+  } @else {
+    <p-card styleClass="settings-card">
+      <form [formGroup]="frmSettings" (ngSubmit)="saveSettings()" class="settings-form">
+        
+        <!-- Logo Section -->
+        <div class="form-section logo-section">
+          <div class="logo-preview-container">
+            @if(currentLogoBase64) {
+              <img [src]="currentLogoBase64" alt="Logo de Barbería" class="logo-preview">
+            } @else {
+              <div class="logo-placeholder">
+                <i class="pi pi-image text-4xl text-slate-400"></i>
+                <span class="text-sm text-slate-500 mt-2">Sin Logo</span>
+              </div>
+            }
+          </div>
+          <div class="logo-upload">
+            <label class="upload-btn">
+              <i class="pi pi-upload mr-2"></i> Cambiar Logo
+              <input type="file" accept="image/*" (change)="onLogoChange($event)" class="hidden-input">
+            </label>
+            <small class="text-slate-500 block mt-2">Recomendado: Imagen cuadrada (PNG o JPG).</small>
+          </div>
+        </div>
+
+        <hr class="form-divider">
+
+        <!-- Business Info Section -->
+        <div class="form-grid">
+          
+          <div class="field col-full">
+            <label for="businessName" class="font-semibold block mb-2">Nombre del Negocio <span class="text-red-500">*</span></label>
+            <input pInputText id="businessName" formControlName="businessName" class="w-full" placeholder="Ej: Mi Barbería" />
+            @if(frmSettings.get('businessName')?.invalid && frmSettings.get('businessName')?.touched) {
+              <small class="text-red-500 block mt-1">El nombre es obligatorio.</small>
+            }
+          </div>
+
+          <div class="field col-full">
+            <label for="address" class="font-semibold block mb-2">Dirección</label>
+            <input pInputText id="address" formControlName="address" class="w-full" placeholder="Ej: Av. Principal 123" />
+          </div>
+
+          <div class="field col-half">
+            <label for="phone" class="font-semibold block mb-2">Teléfono</label>
+            <input pInputText id="phone" formControlName="phone" class="w-full" placeholder="Ej: 999111222" />
+          </div>
+
+          <div class="field col-half">
+            <label for="email" class="font-semibold block mb-2">Correo Electrónico</label>
+            <input pInputText id="email" type="email" formControlName="email" class="w-full" placeholder="Ej: contacto@barberia.com" />
+          </div>
+
+          <div class="field col-half">
+            <label for="openHour" class="font-semibold block mb-2">Horario de Apertura</label>
+            <input pInputText id="openHour" formControlName="openHour" type="time" class="w-full" />
+          </div>
+
+          <div class="field col-half">
+            <label for="closeHour" class="font-semibold block mb-2">Horario de Cierre</label>
+            <input pInputText id="closeHour" formControlName="closeHour" type="time" class="w-full" />
+          </div>
+
+        </div>
+
+        <!-- Footer Buttons -->
+        <div class="form-actions mt-5">
+          <p-button 
+            type="submit" 
+            label="Guardar Cambios" 
+            icon="pi pi-save" 
+            [loading]="saving"
+            styleClass="w-full md:w-auto" />
+        </div>
+
+      </form>
+    </p-card>
+  }
+</div>
