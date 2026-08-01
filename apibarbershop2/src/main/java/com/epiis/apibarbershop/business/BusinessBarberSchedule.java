@@ -131,9 +131,7 @@ public class BusinessBarberSchedule {
 		}
 
 		EntityBarberSchedule entity = optional.get();
-		entity.setStatus(EnumStatus.INACTIVE.getValue());
-		entity.setUpdatedAt(new Date());
-		repositoryBarberSchedule.save(entity);
+		repositoryBarberSchedule.delete(entity);
 
 		response.success();
 		response.listMessage.add("Horario eliminado correctamente.");

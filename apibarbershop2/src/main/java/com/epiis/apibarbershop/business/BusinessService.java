@@ -125,9 +125,7 @@ public class BusinessService {
 		}
 
 		EntityService entity = optional.get();
-		entity.setStatus(EnumStatus.INACTIVE.getValue());
-		entity.setUpdatedAt(new Date());
-		repositoryService.save(entity);
+		repositoryService.delete(entity);
 
 		response.success();
 		response.listMessage.add("Servicio eliminado correctamente.");

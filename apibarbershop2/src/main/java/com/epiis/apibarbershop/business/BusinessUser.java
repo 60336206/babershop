@@ -169,9 +169,7 @@ public class BusinessUser {
 		}
 
 		EntityUser entity = optional.get();
-		entity.setStatus(EnumStatus.INACTIVE.getValue());
-		entity.setUpdatedAt(new Date());
-		repositoryUser.save(entity);
+		repositoryUser.delete(entity);
 
 		response.success();
 		response.listMessage.add("Usuario eliminado correctamente.");
