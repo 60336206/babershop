@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.epiis.apibarbershop.dto.request.RequestAppointmentInsert;
 import com.epiis.apibarbershop.dto.request.RequestAppointmentUpdate;
@@ -25,6 +27,8 @@ import com.epiis.apibarbershop.staticdata.EnumAppointmentStatus;
 
 @Service
 public class BusinessAppointment {
+	private static final Logger log = LoggerFactory.getLogger(BusinessAppointment.class);
+	private static final String APPOINTMENT_NOT_FOUND = "Reserva no encontrada.";
 	private final RepositoryAppointment repositoryAppointment;
 	private final RepositoryAppointmentDetail repositoryAppointmentDetail;
 	private final RepositoryCustomer repositoryCustomer;
@@ -153,7 +157,7 @@ public class BusinessAppointment {
 
 		Optional<EntityAppointment> optional = repositoryAppointment.findById(request.getIdAppointment());
 		if (optional.isEmpty()) {
-			response.listMessage.add("Reserva no encontrada.");
+			response.listMessage.add(APPOINTMENT_NOT_FOUND);
 			return response;
 		}
 
@@ -182,7 +186,9 @@ public class BusinessAppointment {
 				newEnd = Time.valueOf(endHourStr);
 				dateChanged = true;
 			}
-		} catch (Exception ignored) {}
+		} catch (IllegalArgumentException _) {
+			// Los valores inválidos se descartan y se mantiene el horario actual de la reserva.
+		}
 
 		if (dateChanged && newDate != null && newStart != null && newEnd != null) {
 			java.time.LocalDate localNow = java.time.LocalDate.now();
@@ -215,11 +221,11 @@ public class BusinessAppointment {
 
 			List<EntityAppointment> existingAppts = repositoryAppointment.findByIdUserAndAppointmentDate(entity.getIdUser(), newDate);
 			for (EntityAppointment existing : existingAppts) {
-				if (!existing.getIdAppointment().equals(entity.getIdAppointment()) && !existing.getStatus().equals(EnumAppointmentStatus.CANCELLED.toString())) {
-					if (newStart.before(existing.getEndHour()) && existing.getStartHour().before(newEnd)) {
-						response.listMessage.add("El barbero ya tiene una cita ocupada en ese nuevo horario.");
-						return response;
-					}
+				if (!existing.getIdAppointment().equals(entity.getIdAppointment())
+						&& !existing.getStatus().equals(EnumAppointmentStatus.CANCELLED.toString())
+						&& newStart.before(existing.getEndHour()) && existing.getStartHour().before(newEnd)) {
+					response.listMessage.add("El barbero ya tiene una cita ocupada en ese nuevo horario.");
+					return response;
 				}
 			}
 
@@ -245,8 +251,8 @@ public class BusinessAppointment {
 		// Notificación por SMS al confirmar
 		// Notificación por SMS al confirmar
 		try {
-			System.out.println("[DEBUG-NOTIFICACION] Estado recibido: " + request.getStatus());
-			System.out.println("[DEBUG-NOTIFICACION] ID Cliente: " + entity.getIdCustomer());
+			log.debug("Estado recibido para la notificación: {}", request.getStatus());
+			log.debug("ID de cliente para la notificación: {}", entity.getIdCustomer());
 			
 			if ("Confirmada".equalsIgnoreCase(request.getStatus()) && entity.getIdCustomer() != null) {
 				Optional<EntityCustomer> optCustomer = repositoryCustomer.findById(entity.getIdCustomer());
@@ -258,15 +264,15 @@ public class BusinessAppointment {
 					if (customer.getPhone() != null && !customer.getPhone().trim().isEmpty()) {
 						twilioService.sendConfirmationSms(customer.getPhone(), customer.getFirstName(), dateStr, timeStr);
 					} else {
-						System.out.println("[TWILIO] Cliente " + customer.getFirstName() + " no tiene teléfono registrado.");
+						log.warn("El cliente {} no tiene teléfono registrado.", customer.getFirstName());
 					}
 				} else {
-					System.out.println("[TWILIO] No se encontro el cliente en la BD con ID: " + entity.getIdCustomer());
+					log.warn("No se encontró el cliente en la base de datos con ID: {}", entity.getIdCustomer());
 				}
 			}
 
 		} catch (Exception e) {
-			System.err.println("[TWILIO] Error al procesar notificación: " + e.getMessage());
+			log.error("Error al procesar la notificación de la reserva.", e);
 		}
 
 		response.success();
@@ -279,7 +285,7 @@ public class BusinessAppointment {
 
 		Optional<EntityAppointment> optional = repositoryAppointment.findById(idAppointment);
 		if (optional.isEmpty()) {
-			response.listMessage.add("Reserva no encontrada.");
+			response.listMessage.add(APPOINTMENT_NOT_FOUND);
 			return response;
 		}
 
@@ -304,7 +310,7 @@ public class BusinessAppointment {
 
 		Optional<EntityAppointment> optional = repositoryAppointment.findById(idAppointment);
 		if (optional.isEmpty()) {
-			response.listMessage.add("Reserva no encontrada.");
+			response.listMessage.add(APPOINTMENT_NOT_FOUND);
 			return response;
 		}
 

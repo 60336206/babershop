@@ -20,19 +20,23 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
 	public void run(String... args) throws Exception {
 		try {
 			log.info("Iniciando migración automática de roles y esquemas...");
-			
-			try {
-				jdbcTemplate.execute("ALTER TABLE tuser ADD COLUMN phone VARCHAR(255) NULL");
-				log.info("Columna 'phone' agregada a tuser.");
-			} catch (Exception _) {
-				log.info("La columna 'phone' ya existe o no se pudo agregar.");
-			}
+
+			addPhoneColumnIfMissing();
 
 			int updatedToAdmin = jdbcTemplate.update("UPDATE tuser SET role = 'ADMIN' WHERE role = 'Administrador' OR role = 'Super Usuario'");
 			int updatedToBarber = jdbcTemplate.update("UPDATE tuser SET role = 'BARBER' WHERE role = 'Barbero'");
 			log.info("Migración completada. Usuarios actualizados a ADMIN: {}, a BARBER: {}", updatedToAdmin, updatedToBarber);
 		} catch (Exception e) {
 			log.error("Fallo al ejecutar la migración de base de datos: {}", e.getMessage());
+		}
+	}
+
+	private void addPhoneColumnIfMissing() {
+		try {
+			jdbcTemplate.execute("ALTER TABLE tuser ADD COLUMN phone VARCHAR(255) NULL");
+			log.info("Columna 'phone' agregada a tuser.");
+		} catch (Exception _) {
+			log.info("La columna 'phone' ya existe o no se pudo agregar.");
 		}
 	}
 }
