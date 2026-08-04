@@ -47,7 +47,7 @@ public class BusinessUser {
 		if (request.getSurName() == null || request.getSurName().trim().length() < 3) {
 			response.listMessage.add("El apellido es obligatorio y debe tener al menos 3 caracteres.");
 		}
-		if (request.getEmail() == null || !request.getEmail().matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+		if (!isValidEmail(request.getEmail())) {
 			response.listMessage.add("Correo electrónico inválido o vacío.");
 		}
 		if (request.getPassword() == null || !request.getPassword().matches("^(?=.*[A-Z])(?=.*\\d).{6,}$")) {
@@ -116,7 +116,7 @@ public class BusinessUser {
 		if (request.getSurName() == null || request.getSurName().trim().length() < 3) {
 			response.listMessage.add("El apellido es obligatorio y debe tener al menos 3 caracteres.");
 		}
-		if (request.getEmail() == null || !request.getEmail().matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+		if (!isValidEmail(request.getEmail())) {
 			response.listMessage.add("Correo electrónico inválido o vacío.");
 		}
 		if (request.getRole() == null || (!request.getRole().equals("ADMIN") && !request.getRole().equals("BARBER"))) {
@@ -208,6 +208,47 @@ public class BusinessUser {
 		response.success();
 		response.listMessage.add("Usuario obtenido correctamente.");
 		return response;
+	}
+
+	private boolean isValidEmail(String email) {
+		if (email == null || email.length() > 254) {
+			return false;
+		}
+
+		int atIndex = email.indexOf('@');
+		if (atIndex < 1 || atIndex != email.lastIndexOf('@') || atIndex == email.length() - 1) {
+			return false;
+		}
+
+		String localPart = email.substring(0, atIndex);
+		String domain = email.substring(atIndex + 1);
+		if (localPart.length() > 64 || domain.startsWith(".") || domain.endsWith(".") || !domain.contains(".")) {
+			return false;
+		}
+
+		for (int i = 0; i < localPart.length(); i++) {
+			char character = localPart.charAt(i);
+			if (!Character.isLetterOrDigit(character) && character != '.' && character != '_' && character != '-') {
+				return false;
+			}
+		}
+
+		String[] labels = domain.split("\\.", -1);
+		if (labels[labels.length - 1].length() < 2 || labels[labels.length - 1].length() > 4) {
+			return false;
+		}
+		for (String label : labels) {
+			if (label.isEmpty()) {
+				return false;
+			}
+			for (int i = 0; i < label.length(); i++) {
+				char character = label.charAt(i);
+				if (!Character.isLetterOrDigit(character) && character != '-') {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	// ── Subir foto del usuario ──

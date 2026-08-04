@@ -29,7 +29,7 @@ public class AppointmentController {
 			ResponseAppointmentInsert response = new ResponseAppointmentInsert();
 			response.exception();
 			response.listMessage.add("Error al registrar la reserva: " + e.getMessage());
-			return ResponseEntity.ok(response);
+			return ResponseEntity.internalServerError().body(response);
 		}
 	}
 
@@ -43,7 +43,7 @@ public class AppointmentController {
 			ResponseAppointmentUpdate response = new ResponseAppointmentUpdate();
 			response.exception();
 			response.listMessage.add("Error interno del servidor: " + e.getMessage());
-			return ResponseEntity.ok(response);
+			return ResponseEntity.internalServerError().body(response);
 		}
 	}
 
