@@ -69,7 +69,12 @@
             <i class="pi pi-angle-down text-slate-400 text-xs"></i>
           </button>
           @if(showUserMenu) {
-            <div class="user-menu-backdrop" (click)="showUserMenu = false"></div>
+            <div
+              class="user-menu-backdrop"
+              (click)="showUserMenu = false"
+              (keydown)="showUserMenu = false"
+              aria-hidden="true"
+            ></div>
             <div class="user-menu-dropdown">
               <button class="user-menu-item" (click)="logout()">
                 <i class="pi pi-sign-out"></i>
