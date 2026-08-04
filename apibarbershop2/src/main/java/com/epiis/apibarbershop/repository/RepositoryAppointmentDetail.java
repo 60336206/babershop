@@ -5,4 +5,5 @@ import org.springframework.stereotype.Repository;
 import com.epiis.apibarbershop.entity.EntityAppointmentDetail;
 
 @Repository
-public interface RepositoryAppointmentDetail extends JpaRepository<EntityAppointmentDetail, String> {}
+public interface RepositoryAppointmentDetail extends JpaRepository<EntityAppointmentDetail, String> {
+}
