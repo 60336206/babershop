@@ -163,122 +163,126 @@ public class BusinessAppointment {
 
 		EntityAppointment entity = optional.get();
 
-		// Solo actualizar fecha/hora y validar si vienen en la petición
-		boolean dateChanged = false;
-		Date newDate = entity.getAppointmentDate();
-		Time newStart = entity.getStartHour();
-		Time newEnd = entity.getEndHour();
-
-		try {
-			if (request.getAppointmentDate() != null && request.getAppointmentDate().matches("\\d{4}-\\d{2}-\\d{2}")) {
-				newDate = Date.valueOf(request.getAppointmentDate());
-				dateChanged = true;
-			}
-			String startHourStr = request.getStartHour();
-			if (startHourStr != null && startHourStr.matches("\\d{2}:\\d{2}(:\\d{2})?")) {
-				if (startHourStr.length() == 5) startHourStr += ":00";
-				newStart = Time.valueOf(startHourStr);
-				dateChanged = true;
-			}
-			String endHourStr = request.getEndHour();
-			if (endHourStr != null && endHourStr.matches("\\d{2}:\\d{2}(:\\d{2})?")) {
-				if (endHourStr.length() == 5) endHourStr += ":00";
-				newEnd = Time.valueOf(endHourStr);
-				dateChanged = true;
-			}
-		} catch (IllegalArgumentException _) {
-			// Los valores inválidos se descartan y se mantiene el horario actual de la reserva.
+		if (!updateAppointmentSchedule(request, entity, response)) {
+			return response;
 		}
 
-		if (dateChanged && newDate != null && newStart != null && newEnd != null) {
-			java.time.LocalDate localNow = java.time.LocalDate.now();
-			java.time.LocalDate localAppt = newDate.toLocalDate();
-			
-			if (localAppt.isBefore(localNow)) {
-				response.listMessage.add("No se pueden mover citas al pasado.");
-				return response;
-			}
-			if (localAppt.isAfter(localNow.plusDays(365))) {
-				response.listMessage.add("No se pueden mover citas con más de 365 días de anticipación.");
-				return response;
-			}
-			if (localAppt.isEqual(localNow)) {
-				java.time.LocalTime localTimeNow = java.time.LocalTime.now();
-				if (newStart.toLocalTime().isBefore(localTimeNow)) {
-					response.listMessage.add("La hora seleccionada ya ha pasado el día de hoy.");
-					return response;
-				}
-			}
-
-			List<EntitySetting> settings = repositorySetting.findAll();
-			if (!settings.isEmpty()) {
-				EntitySetting setting = settings.get(0);
-				if (newStart.before(setting.getOpenHour()) || newEnd.after(setting.getCloseHour())) {
-					response.listMessage.add("La cita está fuera del horario de atención del negocio.");
-					return response;
-				}
-			}
-
-			List<EntityAppointment> existingAppts = repositoryAppointment.findByIdUserAndAppointmentDate(entity.getIdUser(), newDate);
-			for (EntityAppointment existing : existingAppts) {
-				if (!existing.getIdAppointment().equals(entity.getIdAppointment())
-						&& !existing.getStatus().equals(EnumAppointmentStatus.CANCELLED.toString())
-						&& newStart.before(existing.getEndHour()) && existing.getStartHour().before(newEnd)) {
-					response.listMessage.add("El barbero ya tiene una cita ocupada en ese nuevo horario.");
-					return response;
-				}
-			}
-
-			entity.setAppointmentDate(newDate);
-			entity.setStartHour(newStart);
-			entity.setEndHour(newEnd);
-		}
-
-		if (request.getStatus() != null) {
-			entity.setStatus(request.getStatus());
-		}
-		if (request.getPaymentStatus() != null) {
-			entity.setPaymentStatus(request.getPaymentStatus());
-		}
-		if (request.getPaymentMethod() != null) {
-			entity.setPaymentMethod(request.getPaymentMethod());
-		}
-		entity.setObservation(request.getObservation());
-		entity.setUpdatedAt(new java.util.Date());
+		applyRequestValues(request, entity);
 
 		repositoryAppointment.save(entity);
 
-		// Notificación por SMS al confirmar
-		// Notificación por SMS al confirmar
-		try {
-			log.debug("Estado recibido para la notificación: {}", request.getStatus());
-			log.debug("ID de cliente para la notificación: {}", entity.getIdCustomer());
-			
-			if ("Confirmada".equalsIgnoreCase(request.getStatus()) && entity.getIdCustomer() != null) {
-				Optional<EntityCustomer> optCustomer = repositoryCustomer.findById(entity.getIdCustomer());
-				if (optCustomer.isPresent()) {
-					EntityCustomer customer = optCustomer.get();
-					String dateStr = entity.getAppointmentDate() != null ? entity.getAppointmentDate().toString() : "";
-					String timeStr = entity.getStartHour() != null ? entity.getStartHour().toString().substring(0, 5) : "";
-
-					if (customer.getPhone() != null && !customer.getPhone().trim().isEmpty()) {
-						twilioService.sendConfirmationSms(customer.getPhone(), customer.getFirstName(), dateStr, timeStr);
-					} else {
-						log.warn("El cliente {} no tiene teléfono registrado.", customer.getFirstName());
-					}
-				} else {
-					log.warn("No se encontró el cliente en la base de datos con ID: {}", entity.getIdCustomer());
-				}
-			}
-
-		} catch (Exception e) {
-			log.error("Error al procesar la notificación de la reserva.", e);
-		}
+		sendConfirmationNotification(request.getStatus(), entity);
 
 		response.success();
 		response.listMessage.add("Reserva actualizada correctamente.");
 		return response;
 	}
+
+	private boolean updateAppointmentSchedule(RequestAppointmentUpdate request, EntityAppointment entity,
+			ResponseAppointmentUpdate response) {
+		AppointmentSchedule schedule = getRequestedSchedule(request, entity);
+		if (!schedule.changed()) {
+			return true;
+		}
+		if (!isUpdatedDateValid(schedule, response) || !isWithinUpdatedBusinessHours(schedule, response)
+				|| hasOverlappingAppointment(entity, schedule, response)) {
+			return false;
+		}
+		entity.setAppointmentDate(schedule.date());
+		entity.setStartHour(schedule.startHour());
+		entity.setEndHour(schedule.endHour());
+		return true;
+	}
+
+	private AppointmentSchedule getRequestedSchedule(RequestAppointmentUpdate request, EntityAppointment entity) {
+		Date date = request.getAppointmentDate() != null && request.getAppointmentDate().matches("\\d{4}-\\d{2}-\\d{2}")
+				? Date.valueOf(request.getAppointmentDate()) : entity.getAppointmentDate();
+		Time startHour = parseTime(request.getStartHour(), entity.getStartHour());
+		Time endHour = parseTime(request.getEndHour(), entity.getEndHour());
+		boolean changed = request.getAppointmentDate() != null || request.getStartHour() != null || request.getEndHour() != null;
+		return new AppointmentSchedule(date, startHour, endHour, changed);
+	}
+
+	private Time parseTime(String value, Time defaultValue) {
+		if (value == null || !value.matches("\\d{2}:\\d{2}(:\\d{2})?")) {
+			return defaultValue;
+		}
+		return Time.valueOf(value.length() == 5 ? value + ":00" : value);
+	}
+
+	private boolean isUpdatedDateValid(AppointmentSchedule schedule, ResponseAppointmentUpdate response) {
+		java.time.LocalDate today = java.time.LocalDate.now();
+		java.time.LocalDate appointmentDate = schedule.date().toLocalDate();
+		if (appointmentDate.isBefore(today)) {
+			response.listMessage.add("No se pueden mover citas al pasado.");
+			return false;
+		}
+		if (appointmentDate.isAfter(today.plusDays(365))) {
+			response.listMessage.add("No se pueden mover citas con más de 365 días de anticipación.");
+			return false;
+		}
+		if (appointmentDate.isEqual(today) && schedule.startHour().toLocalTime().isBefore(java.time.LocalTime.now())) {
+			response.listMessage.add("La hora seleccionada ya ha pasado el día de hoy.");
+			return false;
+		}
+		return true;
+	}
+
+	private boolean isWithinUpdatedBusinessHours(AppointmentSchedule schedule, ResponseAppointmentUpdate response) {
+		List<EntitySetting> settings = repositorySetting.findAll();
+		if (settings.isEmpty()) {
+			return true;
+		}
+		EntitySetting setting = settings.get(0);
+		if (schedule.startHour().before(setting.getOpenHour()) || schedule.endHour().after(setting.getCloseHour())) {
+			response.listMessage.add("La cita está fuera del horario de atención del negocio.");
+			return false;
+		}
+		return true;
+	}
+
+	private boolean hasOverlappingAppointment(EntityAppointment entity, AppointmentSchedule schedule,
+			ResponseAppointmentUpdate response) {
+		for (EntityAppointment existing : repositoryAppointment.findByIdUserAndAppointmentDate(entity.getIdUser(), schedule.date())) {
+			boolean overlaps = schedule.startHour().before(existing.getEndHour()) && existing.getStartHour().before(schedule.endHour());
+			if (!existing.getIdAppointment().equals(entity.getIdAppointment())
+					&& !EnumAppointmentStatus.CANCELLED.toString().equals(existing.getStatus()) && overlaps) {
+				response.listMessage.add("El barbero ya tiene una cita ocupada en ese nuevo horario.");
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void applyRequestValues(RequestAppointmentUpdate request, EntityAppointment entity) {
+		if (request.getStatus() != null) entity.setStatus(request.getStatus());
+		if (request.getPaymentStatus() != null) entity.setPaymentStatus(request.getPaymentStatus());
+		if (request.getPaymentMethod() != null) entity.setPaymentMethod(request.getPaymentMethod());
+		entity.setObservation(request.getObservation());
+		entity.setUpdatedAt(new java.util.Date());
+	}
+
+	private void sendConfirmationNotification(String status, EntityAppointment entity) {
+		if (!"Confirmada".equalsIgnoreCase(status) || entity.getIdCustomer() == null) return;
+		try {
+			repositoryCustomer.findById(entity.getIdCustomer()).ifPresentOrElse(
+					customer -> sendSmsToCustomer(customer, entity),
+					() -> log.warn("No se encontró el cliente en la base de datos con ID: {}", entity.getIdCustomer()));
+		} catch (Exception e) {
+			log.error("Error al procesar la notificación de la reserva.", e);
+		}
+	}
+
+	private void sendSmsToCustomer(EntityCustomer customer, EntityAppointment appointment) {
+		if (customer.getPhone() == null || customer.getPhone().trim().isEmpty()) {
+			log.warn("El cliente {} no tiene teléfono registrado.", customer.getFirstName());
+			return;
+		}
+		twilioService.sendConfirmationSms(customer.getPhone(), customer.getFirstName(),
+				appointment.getAppointmentDate().toString(), appointment.getStartHour().toString().substring(0, 5));
+	}
+
+	private record AppointmentSchedule(Date date, Time startHour, Time endHour, boolean changed) { }
 
 	public ResponseAppointmentDelete delete(String idAppointment) {
 		ResponseAppointmentDelete response = new ResponseAppointmentDelete();
