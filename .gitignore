@@ -1,0 +1,43 @@
+# ─── Build artifacts ───
+dist/
+target/
+build/
+out-tsc/
+bazel-out/
+
+# ─── Node ───
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# ─── Angular / Sonar caches ───
+.angular/cache/
+.scannerwork/
+
+# ─── Coverage ───
+coverage/
+
+# ─── Tool-generated junk ───
+*.zip
+issues*.json
+smells.json
+duplications.json
+duplications2.json
+generate-*.js
+generate_*.js
+fix_*.js
+restore_*.js
+ast_fix.js
+super-generate-tests.js
+analyze-coverage.js
+get_smells.js
+get_duplications.js
+suppress.js
+
+# ─── Java tooling ───
+apache-maven-3.9.6/
+test_uploads/
+
+# System files
+.DS_Store
+Thumbs.db
