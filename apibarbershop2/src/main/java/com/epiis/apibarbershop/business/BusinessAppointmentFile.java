@@ -1,11 +1,6 @@
 package com.epiis.apibarbershop.business;
 
 import com.epiis.apibarbershop.generic.ValidationConstants;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Date;
 import java.util.UUID;
 
@@ -18,21 +13,25 @@ import com.epiis.apibarbershop.dto.response.ResponseAppointmentFileUpload;
 import com.epiis.apibarbershop.entity.EntityAppointmentFile;
 import com.epiis.apibarbershop.repository.RepositoryAppointment;
 import com.epiis.apibarbershop.repository.RepositoryAppointmentFile;
+import com.epiis.apibarbershop.service.FileStorageService;
 
 @Service
 public class BusinessAppointmentFile {
 
 	private final RepositoryAppointmentFile repositoryAppointmentFile;
 	private final RepositoryAppointment repositoryAppointment;
+	private final FileStorageService fileStorageService;
 
 	@Value("${upload.path:uploads/appointments/}")
 	private String uploadPath;
 
 	public BusinessAppointmentFile(
 			RepositoryAppointmentFile repositoryAppointmentFile,
-			RepositoryAppointment repositoryAppointment) {
+			RepositoryAppointment repositoryAppointment,
+			FileStorageService fileStorageService) {
 		this.repositoryAppointmentFile = repositoryAppointmentFile;
 		this.repositoryAppointment = repositoryAppointment;
+		this.fileStorageService = fileStorageService;
 	}
 
 	public ResponseAppointmentFileUpload uploadImage(String idAppointment, MultipartFile file) {
@@ -44,43 +43,12 @@ public class BusinessAppointmentFile {
 			return response;
 		}
 
-		// Validar que el archivo no esté vacío
-		if (file == null || file.isEmpty()) {
-			response.listMessage.add("Debe seleccionar un archivo.");
-			return response;
-		}
-
-		// Obtener nombre original y extensión
-		String originalName = file.getOriginalFilename();
-		if (originalName == null || !originalName.contains(".")) {
-			response.listMessage.add("Archivo sin extensión válida.");
-			return response;
-		}
-
-		String extension = originalName.substring(originalName.lastIndexOf(".") + 1).toLowerCase();
-
-		// Validar extensiones permitidas
-		if (!extension.matches("jpg|jpeg|png|webp|gif")) {
-			response.listMessage.add("Solo se permiten imágenes (jpg, jpeg, png, webp, gif).");
-			return response;
-		}
-
-		// Generar nombre único para el archivo
-		String uniqueName = UUID.randomUUID().toString() + "." + extension;
-
-		// Crear directorio si no existe
+		// Validar y guardar el archivo usando el servicio compartido
+		FileStorageService.StoredFile storedFile;
 		try {
-			Path dirPath = Paths.get(uploadPath);
-			if (!Files.exists(dirPath)) {
-				Files.createDirectories(dirPath);
-			}
-
-			// Guardar archivo en disco
-			Path filePath = dirPath.resolve(uniqueName);
-			file.transferTo(new File(filePath.toAbsolutePath().toString()));
-
-		} catch (IOException e) {
-			response.listMessage.add("Error al guardar el archivo: " + e.getMessage());
+			storedFile = fileStorageService.store(file, uploadPath, "Debe seleccionar un archivo.");
+		} catch (FileStorageService.FileValidationException | FileStorageService.FileStorageException e) {
+			response.listMessage.add(e.getMessage());
 			return response;
 		}
 
@@ -89,15 +57,15 @@ public class BusinessAppointmentFile {
 		EntityAppointmentFile entity = new EntityAppointmentFile();
 		entity.setIdAppointmentFile(UUID.randomUUID().toString());
 		entity.setIdAppointment(idAppointment);
-		entity.setFileName(uniqueName);
-		entity.setExtension(extension);
+		entity.setFileName(storedFile.getFileName());
+		entity.setExtension(storedFile.getExtension());
 		entity.setCreatedAt(now);
 		entity.setUpdatedAt(now);
 
 		repositoryAppointmentFile.save(entity);
 
-		response.fileName = uniqueName;
-		response.extension = extension;
+		response.fileName = storedFile.getFileName();
+		response.extension = storedFile.getExtension();
 		response.success();
 		response.listMessage.add("Imagen subida correctamente.");
 		return response;

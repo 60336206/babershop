@@ -28,6 +28,7 @@ import com.epiis.apibarbershop.dto.response.ResponseUserUpdate;
 import com.epiis.apibarbershop.entity.EntityUser;
 import com.epiis.apibarbershop.repository.RepositoryCustomer;
 import com.epiis.apibarbershop.repository.RepositoryUser;
+import com.epiis.apibarbershop.service.FileStorageService;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("all")
@@ -44,6 +45,9 @@ class BusinessUserTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private FileStorageService fileStorageService;
 
     @BeforeEach
     void setUp() {

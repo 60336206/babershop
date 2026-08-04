@@ -1,11 +1,6 @@
 package com.epiis.apibarbershop.business;
 
 import com.epiis.apibarbershop.generic.ValidationConstants;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
@@ -22,6 +17,7 @@ import com.epiis.apibarbershop.entity.EntityUser;
 import com.epiis.apibarbershop.repository.RepositoryUser;
 import com.epiis.apibarbershop.repository.RepositoryCustomer;
 import com.epiis.apibarbershop.staticdata.EnumStatus;
+import com.epiis.apibarbershop.service.FileStorageService;
 
 @Service
 @SuppressWarnings("all")
@@ -29,14 +25,17 @@ public class BusinessUser {
 	private final RepositoryUser repositoryUser;
 	private final RepositoryCustomer repositoryCustomer;
 	private final PasswordEncoder passwordEncoder;
+	private final FileStorageService fileStorageService;
 
 	@Value("${upload.users.path:uploads/users/}")
 	private String uploadUsersPath;
 
-	public BusinessUser(RepositoryUser repositoryUser, RepositoryCustomer repositoryCustomer, PasswordEncoder passwordEncoder) {
+	public BusinessUser(RepositoryUser repositoryUser, RepositoryCustomer repositoryCustomer,
+			PasswordEncoder passwordEncoder, FileStorageService fileStorageService) {
 		this.repositoryUser = repositoryUser;
 		this.repositoryCustomer = repositoryCustomer;
 		this.passwordEncoder = passwordEncoder;
+		this.fileStorageService = fileStorageService;
 	}
 
 	public ResponseUserInsert insert(RequestUserInsert request) {
@@ -264,48 +263,22 @@ public class BusinessUser {
 			return response;
 		}
 
-		// Validar archivo
-		if (file == null || file.isEmpty()) {
-			response.listMessage.add("Debe seleccionar una imagen.");
-			return response;
-		}
-
-		String originalName = file.getOriginalFilename();
-		if (originalName == null || !originalName.contains(".")) {
-			response.listMessage.add("Archivo sin extensión válida.");
-			return response;
-		}
-
-		String extension = originalName.substring(originalName.lastIndexOf(".") + 1).toLowerCase();
-
-		if (!extension.matches("jpg|jpeg|png|webp|gif")) {
-			response.listMessage.add("Solo se permiten imágenes (jpg, jpeg, png, webp, gif).");
-			return response;
-		}
-
-		// Nombre único
-		String uniqueName = UUID.randomUUID().toString() + "." + extension;
-
-		// Guardar en disco
+		// Validar y guardar la imagen usando el servicio compartido
+		FileStorageService.StoredFile storedFile;
 		try {
-			Path dirPath = Paths.get(uploadUsersPath);
-			if (!Files.exists(dirPath)) {
-				Files.createDirectories(dirPath);
-			}
-			Path filePath = dirPath.resolve(uniqueName);
-			file.transferTo(new File(filePath.toAbsolutePath().toString()));
-		} catch (IOException e) {
-			response.listMessage.add("Error al guardar la imagen: " + e.getMessage());
+			storedFile = fileStorageService.store(file, uploadUsersPath, "Debe seleccionar una imagen.");
+		} catch (FileStorageService.FileValidationException | FileStorageService.FileStorageException e) {
+			response.listMessage.add(e.getMessage());
 			return response;
 		}
 
 		// Actualizar campo photo en BD
 		EntityUser entity = optional.get();
-		entity.setPhoto(uploadUsersPath + uniqueName);
+		entity.setPhoto(uploadUsersPath + storedFile.getFileName());
 		entity.setUpdatedAt(new Date());
 		repositoryUser.save(entity);
 
-		response.photo = uploadUsersPath + uniqueName;
+		response.photo = uploadUsersPath + storedFile.getFileName();
 		response.success();
 		response.listMessage.add("Foto subida correctamente.");
 		return response;
