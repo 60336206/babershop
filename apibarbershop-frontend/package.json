@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "node node_modules/@angular/cli/bin/ng.js build",
     "watch": "ng build --watch --configuration development",
-    "test": "jest"
+    "test": "jest",
+    "sonar": "node normalize-lcov.js && sonar-scanner"
   },
   "private": true,
   "engines": {
