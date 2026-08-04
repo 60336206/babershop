@@ -38,7 +38,7 @@
 		<sonar.coverage.jacoco.xmlReportPaths>
 			${project.build.directory}/site/jacoco/jacoco.xml
 		</sonar.coverage.jacoco.xmlReportPaths>
-		<sonar.login>sqp_a53c1691305ead9d46103eb26720ec11305095e3</sonar.login>
+
 	</properties>
 	<dependencies>
 
