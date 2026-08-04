@@ -18,6 +18,8 @@ import { Api } from '../../api/api';
 import { apiservicegetall, apiserviceinsert, apiserviceupdate, apiservicedelete } from '../../api/functions';
 
 import { noWhitespaceValidator } from '../../shared/validators/no-whitespace.validator';
+import { apiErrorMessage, isApiSuccess, parseApiResponse } from '../../shared/utils/api-response.util';
+import { STATUS_OPTIONS, getStatusSeverity } from '../../shared/utils/status.util';
 
 @Component({
   selector: 'app-services',
@@ -49,10 +51,7 @@ export class Services implements OnInit {
   listService: any[] = [];
   loading = false;
 
-  statusOptions = [
-    { label: 'Activo', value: 1 },
-    { label: 'Inactivo', value: 0 }
-  ];
+  statusOptions = STATUS_OPTIONS;
 
   dialogVisible = false;
   isEditing = false;
@@ -87,7 +86,7 @@ export class Services implements OnInit {
   private loadServices(): void {
     this.loading = true;
     this.api.invoke(apiservicegetall).then((response: any) => {
-      const data = typeof response === 'string' ? JSON.parse(response) : response;
+      const data = parseApiResponse(response);
       this.listService = data?.listService ?? [];
       this.loading = false;
       this.cdr.detectChanges();
@@ -110,8 +109,8 @@ export class Services implements OnInit {
     };
     
     this.api.invoke(apiserviceupdate as any, { body }).then((res: any) => {
-      const data = typeof res === 'string' ? JSON.parse(res) : res;
-      if (data?.type === 'success') {
+      const data = parseApiResponse(res);
+      if (isApiSuccess(data)) {
         service.status = newStatus;
         this.messageService.add({ severity: 'success', summary: 'Correcto', detail: 'Estado actualizado.' });
         this.cdr.detectChanges();
@@ -194,13 +193,13 @@ export class Services implements OnInit {
       : { name: v.name, description: v.description, price: v.price, durationMinutes: v.durationMinutes, image: v.image ?? '', status: v.status };
 
     this.api.invoke(fn as any, { body }).then((response: any) => {
-      const data = typeof response === 'string' ? JSON.parse(response) : response;
-      if (data?.type === 'success') {
-        this.messageService.add({ severity: 'success', summary: 'Correcto', detail: data.listMessage?.[0] ?? 'Servicio guardado.' });
+      const data = parseApiResponse(response);
+      if (isApiSuccess(data)) {
+        this.messageService.add({ severity: 'success', summary: 'Correcto', detail: apiErrorMessage(data, 'Servicio guardado.') });
         this.dialogVisible = false;
         this.loadServices();
       } else {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: data.listMessage?.[0] ?? 'Error al guardar.' });
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: apiErrorMessage(data, 'Error al guardar.') });
       }
     }).catch(() => {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error de conexión.' });
@@ -217,8 +216,8 @@ export class Services implements OnInit {
       acceptButtonProps:  { label: 'Sí, eliminar', severity: 'danger' },
       accept: () => {
         this.api.invoke(apiservicedelete, { idService: service.idService }).then((response: any) => {
-          const data = typeof response === 'string' ? JSON.parse(response) : response;
-          if (data?.type === 'success') {
+          const data = parseApiResponse(response);
+          if (isApiSuccess(data)) {
             this.listService = this.listService.filter(s => s.idService !== service.idService);
             this.messageService.add({ severity: 'success', summary: 'Correcto', detail: 'Servicio eliminado.' });
             this.cdr.detectChanges();
@@ -232,7 +231,5 @@ export class Services implements OnInit {
     });
   }
 
-  getStatusSeverity(status: number): 'success' | 'danger' {
-    return status === 1 ? 'success' : 'danger';
-  }
+  getStatusSeverity = getStatusSeverity;
 }

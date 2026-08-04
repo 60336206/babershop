@@ -16,6 +16,8 @@ import { Api } from '../../api/api';
 import { apicustomergetall, apicustomerinsert, ApicustomerinsertParams, apicustomerupdate, apicustomerdelete } from '../../api/functions';
 
 import { noWhitespaceValidator } from '../../shared/validators/no-whitespace.validator';
+import { apiErrorMessage, isApiSuccess, parseApiResponse } from '../../shared/utils/api-response.util';
+import { STATUS_OPTIONS, getStatusSeverity } from '../../shared/utils/status.util';
 
 @Component({
   selector: 'app-customers',
@@ -46,10 +48,7 @@ export class Customers implements OnInit {
   listCustomer: any[] = [];
   loading = false;
 
-  statusOptions = [
-    { label: 'Activo', value: 1 },
-    { label: 'Inactivo', value: 0 }
-  ];
+  statusOptions = STATUS_OPTIONS;
 
   dialogVisible = false;
   isEditing = false;
@@ -82,7 +81,7 @@ export class Customers implements OnInit {
   private loadCustomers(): void {
     this.loading = true;
     this.api.invoke(apicustomergetall).then((response: any) => {
-      const data = typeof response === 'string' ? JSON.parse(response) : response;
+      const data = parseApiResponse(response);
       this.listCustomer = data?.listCustomer ?? [];
       this.loading = false;
       this.cdr.detectChanges();
@@ -104,8 +103,8 @@ export class Customers implements OnInit {
     };
     
     this.api.invoke(apicustomerupdate as any, { body }).then((res: any) => {
-      const data = typeof res === 'string' ? JSON.parse(res) : res;
-      if (data?.type === 'success') {
+      const data = parseApiResponse(res);
+      if (isApiSuccess(data)) {
         customer.status = newStatus;
         this.messageService.add({ severity: 'success', summary: 'Correcto', detail: 'Estado actualizado.' });
         this.cdr.detectChanges();
@@ -153,13 +152,13 @@ export class Customers implements OnInit {
       };
 
       this.api.invoke(apicustomerupdate, { body }).then((response: any) => {
-        const data = typeof response === 'string' ? JSON.parse(response) : response;
-        if (data?.type === 'success') {
+        const data = parseApiResponse(response);
+        if (isApiSuccess(data)) {
           this.messageService.add({ severity: 'success', summary: 'Correcto', detail: 'Cliente actualizado.' });
           this.dialogVisible = false;
           this.loadCustomers();
         } else {
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: data.listMessage?.[0] ?? 'Error al actualizar.' });
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: apiErrorMessage(data, 'Error al actualizar.') });
         }
       }).catch(() => {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al actualizar el cliente.' });
@@ -176,13 +175,13 @@ export class Customers implements OnInit {
       };
 
       this.api.invoke(apicustomerinsert, params).then((response: any) => {
-        const data = typeof response === 'string' ? JSON.parse(response) : response;
-        if (data?.type === 'success') {
+        const data = parseApiResponse(response);
+        if (isApiSuccess(data)) {
           this.messageService.add({ severity: 'success', summary: 'Correcto', detail: 'Cliente registrado.' });
           this.dialogVisible = false;
           this.loadCustomers();
         } else {
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: data.listMessage?.[0] ?? 'Error al registrar.' });
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: apiErrorMessage(data, 'Error al registrar.') });
         }
       }).catch(() => {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al registrar el cliente.' });
@@ -200,8 +199,8 @@ export class Customers implements OnInit {
       acceptButtonProps:  { label: 'Sí, eliminar', severity: 'danger' },
       accept: () => {
         this.api.invoke(apicustomerdelete, { idCustomer: customer.idCustomer }).then((response: any) => {
-          const data = typeof response === 'string' ? JSON.parse(response) : response;
-          if (data?.type === 'success') {
+          const data = parseApiResponse(response);
+          if (isApiSuccess(data)) {
             this.listCustomer = this.listCustomer.filter(c => c.idCustomer !== customer.idCustomer);
             this.messageService.add({ severity: 'success', summary: 'Correcto', detail: 'Cliente eliminado.' });
             this.cdr.detectChanges();
@@ -215,7 +214,5 @@ export class Customers implements OnInit {
     });
   }
 
-  getStatusSeverity(status: number): 'success' | 'danger' {
-    return status === 1 ? 'success' : 'danger';
-  }
+  getStatusSeverity = getStatusSeverity;
 }

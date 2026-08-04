@@ -19,6 +19,8 @@ import { Api } from '../../api/api';
 import { apiusergetall, apiuserinsert, apiuserupdate, apiuserdelete } from '../../api/functions';
 
 import { noWhitespaceValidator } from '../../shared/validators/no-whitespace.validator';
+import { apiErrorMessage, isApiSuccess, parseApiResponse } from '../../shared/utils/api-response.util';
+import { STATUS_OPTIONS, getStatusSeverity } from '../../shared/utils/status.util';
 
 @Component({
   selector: 'app-users',
@@ -66,10 +68,7 @@ export class Users implements OnInit {
     { label: 'Barbero',       value: 'BARBER' }
   ];
 
-  statusOptions = [
-    { label: 'Activo', value: 1 },
-    { label: 'Inactivo', value: 0 }
-  ];
+  statusOptions = STATUS_OPTIONS;
 
   get firstNameFb() { return this.frmUser.controls['firstName']; }
   get surNameFb()   { return this.frmUser.controls['surName']; }
@@ -98,7 +97,7 @@ export class Users implements OnInit {
   private loadUsers(): void {
     this.loading = true;
     this.api.invoke(apiusergetall).then((response: any) => {
-      const data = typeof response === 'string' ? JSON.parse(response) : response;
+      const data = parseApiResponse(response);
       this.listUser = data?.listUser?.map((u: any) => ({
         ...u,
         photoUrl: u.photo ? (this.api.rootUrl + (u.photo.startsWith('/') ? '' : '/') + u.photo) : null
@@ -151,8 +150,8 @@ export class Users implements OnInit {
     };
     
     this.api.invoke(apiuserupdate as any, { body }).then((res: any) => {
-      const data = typeof res === 'string' ? JSON.parse(res) : res;
-      if (data?.type === 'success') {
+      const data = parseApiResponse(res);
+      if (isApiSuccess(data)) {
         user.status = newStatus;
         this.messageService.add({ severity: 'success', summary: 'Correcto', detail: 'Estado actualizado.' });
         this.cdr.detectChanges();
@@ -205,15 +204,15 @@ export class Users implements OnInit {
       };
 
       this.api.invoke(apiuserupdate, { body }).then((response: any) => {
-        const data = typeof response === 'string' ? JSON.parse(response) : response;
-        if (data?.type === 'success') {
+        const data = parseApiResponse(response);
+        if (isApiSuccess(data)) {
           this.uploadPhoto(this.frmUser.value.idUser, () => {
-            this.messageService.add({ severity: 'success', summary: 'Correcto', detail: data.listMessage?.[0] ?? 'Usuario actualizado.' });
+            this.messageService.add({ severity: 'success', summary: 'Correcto', detail: apiErrorMessage(data, 'Usuario actualizado.') });
             this.dialogVisible = false;
             this.loadUsers();
           });
         } else {
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: data.listMessage?.[0] ?? 'No se pudo actualizar.' });
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: apiErrorMessage(data, 'No se pudo actualizar.') });
         }
       }).catch(() => {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al actualizar el usuario.' });
@@ -234,15 +233,15 @@ export class Users implements OnInit {
       };
 
       this.api.invoke(apiuserinsert, { body }).then((response: any) => {
-        const data = typeof response === 'string' ? JSON.parse(response) : response;
-        if (data?.type === 'success') {
+        const data = parseApiResponse(response);
+        if (isApiSuccess(data)) {
           this.uploadPhoto(data.idUser, () => {
-            this.messageService.add({ severity: 'success', summary: 'Correcto', detail: data.listMessage?.[0] ?? 'Usuario registrado.' });
+            this.messageService.add({ severity: 'success', summary: 'Correcto', detail: apiErrorMessage(data, 'Usuario registrado.') });
             this.dialogVisible = false;
             this.loadUsers();
           });
         } else {
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: data.listMessage?.[0] ?? 'No se pudo registrar.' });
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: apiErrorMessage(data, 'No se pudo registrar.') });
         }
       }).catch(() => {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al registrar el usuario.' });
@@ -267,13 +266,13 @@ export class Users implements OnInit {
 
   private deleteUser(idUser: string): void {
     this.api.invoke(apiuserdelete, { idUser }).then((response: any) => {
-      const data = typeof response === 'string' ? JSON.parse(response) : response;
-      if (data?.type === 'success') {
+      const data = parseApiResponse(response);
+      if (isApiSuccess(data)) {
         this.listUser = this.listUser.filter(u => u.idUser !== idUser);
         this.messageService.add({ severity: 'success', summary: 'Correcto', detail: 'Usuario eliminado.' });
         this.cdr.detectChanges();
       } else {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: data.listMessage?.[0] ?? 'No se pudo eliminar.' });
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: apiErrorMessage(data, 'No se pudo eliminar.') });
       }
     }).catch(() => {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al eliminar el usuario.' });
@@ -288,7 +287,5 @@ export class Users implements OnInit {
     }
   }
 
-  getStatusSeverity(status: number): 'success' | 'danger' {
-    return status === 1 ? 'success' : 'danger';
-  }
+  getStatusSeverity = getStatusSeverity;
 }
