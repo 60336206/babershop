@@ -4,22 +4,28 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { Api } from '@/app/api/api';
 import { NO_ERRORS_SCHEMA, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
+import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
+import { of, Subject } from 'rxjs';
 
 
 describe('AdminLayout', () => {
   let component: AdminLayout;
   let fixture: ComponentFixture<AdminLayout>;
+  let events$: Subject<any>;
 
   beforeEach(async () => {
     (window as any).apiMockResponse = { type: 'success', idCustomer: 1, idAppointment: 1, listMessage: [], listCustomer: [{status: 1}], listService: [], listGallery: [], listUser: [{status:1}], listSchedule: [] };
+    events$ = new Subject();
     await TestBed.configureTestingModule({
       imports: [AdminLayout, HttpClientTestingModule],
       providers: [
         
         MessageService,
         ConfirmationService,
+        {
+          provide: Router,
+          useValue: { url: '/dashboard', events: events$ }
+        },
         {
           provide: ActivatedRoute,
           useValue: { params: of({}), queryParams: of({}) }
@@ -336,5 +342,21 @@ describe('AdminLayout', () => {
   });
   it('should call getter pageName', () => {
     try { const temp = component.pageName; } catch(e) {}
+  });
+
+  it('should update currentRoute and collapse sidebar on NavigationEnd with small window', () => {
+    const originalWidth = globalThis.window.innerWidth;
+    Object.defineProperty(globalThis.window, 'innerWidth', { configurable: true, get: () => 500 });
+    events$.next(new NavigationEnd(1, '/dashboard', '/appointments'));
+    expect(component.currentRoute).toBe('/appointments');
+    expect(component.sidebarCollapsed).toBe(true);
+    Object.defineProperty(globalThis.window, 'innerWidth', { configurable: true, get: () => originalWidth });
+  });
+
+  it('should keep sidebar expanded on NavigationEnd with wide window', () => {
+    component.sidebarCollapsed = false;
+    events$.next(new NavigationEnd(1, '/dashboard', '/services'));
+    expect(component.currentRoute).toBe('/services');
+    expect(component.sidebarCollapsed).toBe(false);
   });
 });

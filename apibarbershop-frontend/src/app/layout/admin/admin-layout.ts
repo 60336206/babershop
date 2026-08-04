@@ -43,7 +43,7 @@ export class AdminLayout implements OnInit, OnDestroy {
   private routerSub!: Subscription;
 
   user = this.authService.getUser();
-  sidebarCollapsed = typeof globalThis.window !== 'undefined' && globalThis.window.innerWidth <= 768;
+  sidebarCollapsed = globalThis.window.innerWidth <= 768;
   currentRoute = '';
   logoBase64: string = 'logo.png';
 
@@ -54,9 +54,7 @@ export class AdminLayout implements OnInit, OnDestroy {
   ];
 
   ngOnInit(): void {
-    if (typeof globalThis.window !== 'undefined') {
-      this.sidebarCollapsed = globalThis.window.innerWidth <= 768;
-    }
+    this.sidebarCollapsed = globalThis.window.innerWidth <= 768;
 
     this.api.invoke(apisettinggetone as any, {}).then((res: any) => {
       const data = typeof res === 'string' ? JSON.parse(res) : res;
@@ -87,7 +85,7 @@ export class AdminLayout implements OnInit, OnDestroy {
       filter(e => e instanceof NavigationEnd)
     ).subscribe((e: any) => {
       this.currentRoute = e.urlAfterRedirects;
-      if (typeof globalThis.window !== 'undefined' && globalThis.window.innerWidth <= 768) {
+      if (globalThis.window.innerWidth <= 768) {
         this.sidebarCollapsed = true;
       }
     });
