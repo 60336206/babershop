@@ -12,19 +12,26 @@ describe('AdminLayout', () => {
   let component: AdminLayout;
   let fixture: ComponentFixture<AdminLayout>;
   let events$: Subject<any>;
+  let confirmConfigs: any[];
+  let navigations: any[];
 
   beforeEach(async () => {
     (window as any).apiMockResponse = { type: 'success', idCustomer: 1, idAppointment: 1, listMessage: [], listCustomer: [{status: 1}], listService: [], listGallery: [], listUser: [{status:1}], listSchedule: [] };
     events$ = new Subject();
+    confirmConfigs = [];
+    navigations = [];
     await TestBed.configureTestingModule({
       imports: [AdminLayout, HttpClientTestingModule],
       providers: [
         
         MessageService,
-        ConfirmationService,
+        {
+          provide: ConfirmationService,
+          useValue: { confirm: (conf: any) => { confirmConfigs.push(conf); } }
+        },
         {
           provide: Router,
-          useValue: { url: '/dashboard', events: events$ }
+          useValue: { url: '/dashboard', events: events$, navigate: (cmd: any) => { navigations.push(cmd); return Promise.resolve(true); } }
         },
         {
           provide: ActivatedRoute,
@@ -342,6 +349,26 @@ describe('AdminLayout', () => {
   });
   it('should call getter pageName', () => {
     try { const temp = component.pageName; } catch(e) {}
+  });
+
+  it('should toggle user menu', () => {
+    const before = component.showUserMenu;
+    component.toggleUserMenu();
+    expect(component.showUserMenu).toBe(!before);
+    component.toggleUserMenu();
+    expect(component.showUserMenu).toBe(before);
+  });
+
+  it('should ask for confirmation on logout', () => {
+    component.logout();
+    expect(confirmConfigs.length).toBe(1);
+    expect(component.showUserMenu).toBe(false);
+  });
+
+  it('should logout after confirmation accept', () => {
+    component.logout();
+    confirmConfigs[0].accept();
+    expect(navigations[0]).toEqual(['/auth/login']);
   });
 
   it('should update currentRoute and collapse sidebar on NavigationEnd with small window', () => {

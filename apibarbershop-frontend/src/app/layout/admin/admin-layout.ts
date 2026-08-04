@@ -5,11 +5,10 @@ import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 import { AvatarModule } from 'primeng/avatar';
-import { MenuModule } from 'primeng/menu';
 import { ButtonModule } from 'primeng/button';
 import { BadgeModule } from 'primeng/badge';
 import { TooltipModule } from 'primeng/tooltip';
-import { MenuItem } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
 
 import { AuthService } from '../../observable/auth/auth.service';
 import { Api } from '../../api/api';
@@ -28,7 +27,6 @@ interface NavItem {
     CommonModule,
     RouterModule,
     AvatarModule,
-    MenuModule,
     ButtonModule,
     BadgeModule,
     TooltipModule
@@ -40,18 +38,16 @@ export class AdminLayout implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly router      = inject(Router);
   private readonly api         = inject(Api);
+  private readonly confirmationService = inject(ConfirmationService);
   private routerSub!: Subscription;
 
   user = this.authService.getUser();
   sidebarCollapsed = globalThis.window.innerWidth <= 768;
   currentRoute = '';
   logoBase64: string = 'logo.png';
+  showUserMenu = false;
 
   navItems: NavItem[] = [];
-
-  profileItems: MenuItem[] = [
-    { label: 'Cerrar sesión', icon: 'pi pi-sign-out', command: () => this.logout() }
-  ];
 
   ngOnInit(): void {
     this.sidebarCollapsed = globalThis.window.innerWidth <= 768;
@@ -103,9 +99,23 @@ export class AdminLayout implements OnInit, OnDestroy {
     this.sidebarCollapsed = !this.sidebarCollapsed;
   }
 
+  toggleUserMenu(): void {
+    this.showUserMenu = !this.showUserMenu;
+  }
+
   logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/auth/login']);
+    this.showUserMenu = false;
+    this.confirmationService.confirm({
+      message: '¿Seguro que deseas cerrar sesión?',
+      header: 'Cerrar sesión',
+      icon: 'pi pi-sign-out',
+      rejectButtonProps: { label: 'Cancelar', severity: 'secondary', outlined: true },
+      acceptButtonProps: { label: 'Sí, salir', severity: 'danger' },
+      accept: () => {
+        this.authService.logout();
+        this.router.navigate(['/auth/login']);
+      }
+    });
   }
 
   get userInitials(): string {
