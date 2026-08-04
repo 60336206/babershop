@@ -1,21 +1,33 @@
 package com.epiis.apibarbershop.business;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import java.util.Date;
-import java.util.Optional;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
-import com.epiis.apibarbershop.repository.*;
-import com.epiis.apibarbershop.business.*;
-import com.epiis.apibarbershop.security.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import com.epiis.apibarbershop.service.TwilioService;
-import com.epiis.apibarbershop.dto.request.*;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import com.epiis.apibarbershop.dto.request.RequestUserInsert;
+import com.epiis.apibarbershop.dto.request.RequestUserUpdate;
+import com.epiis.apibarbershop.dto.response.ResponseUserDelete;
+import com.epiis.apibarbershop.dto.response.ResponseUserGetAll;
+import com.epiis.apibarbershop.dto.response.ResponseUserGetOne;
+import com.epiis.apibarbershop.dto.response.ResponseUserInsert;
+import com.epiis.apibarbershop.dto.response.ResponseUserUpdate;
+import com.epiis.apibarbershop.entity.EntityUser;
+import com.epiis.apibarbershop.repository.RepositoryCustomer;
+import com.epiis.apibarbershop.repository.RepositoryUser;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("all")
@@ -33,66 +45,100 @@ class BusinessUserTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
-    private void fillDto(Object dto) {
-        for (java.lang.reflect.Method m : dto.getClass().getMethods()) {
-            if (m.getName().startsWith("set") && m.getParameterCount() == 1) {
-                Class<?> type = m.getParameterTypes()[0];
-                try {
-                    if (type == String.class) m.invoke(dto, "999999999");
-                    else if (type == Integer.class || type == int.class) m.invoke(dto, 1);
-                    else if (type == Boolean.class || type == boolean.class) m.invoke(dto, true);
-                    else if (type == Date.class) m.invoke(dto, new Date());
-                    else if (type == Double.class || type == double.class) m.invoke(dto, 1.0);
-                } catch(Exception e) {}
-            }
-        }
+    @BeforeEach
+    void setUp() {
+        EntityUser user = new EntityUser();
+        user.setIdUser("user-id");
+        user.setEmail("test@test.com");
+        user.setPhone("123456789");
+        
+        lenient().when(repositoryUser.findById(anyString())).thenReturn(Optional.of(user));
+        lenient().when(repositoryUser.findAll()).thenReturn(List.of(user));
+        lenient().when(repositoryUser.save(any())).thenReturn(user);
+        lenient().when(passwordEncoder.encode(anyString())).thenReturn("encoded");
+        
+        lenient().when(repositoryUser.findByEmail(anyString())).thenReturn(Optional.empty());
+        lenient().when(repositoryUser.findByPhone(anyString())).thenReturn(Optional.empty());
+        lenient().when(repositoryCustomer.findByEmail(anyString())).thenReturn(Optional.empty());
+        lenient().when(repositoryCustomer.findByPhone(anyString())).thenReturn(Optional.empty());
+
+        ReflectionTestUtils.setField(target, "uploadUsersPath", "uploads/users/");
     }
 
     @Test
-    void testInsert() {
-        assertDoesNotThrow(() -> {
-            RequestUserInsert req = new RequestUserInsert();
-            fillDto(req);
-            target.insert(req);
-        });
+    void testInsert_Success() {
+        RequestUserInsert req = new RequestUserInsert();
+        req.setFirstName("First");
+        req.setSurName("Last");
+        req.setEmail("new@test.com");
+        req.setPhone("987654321");
+        req.setPassword("Password123");
+        req.setRole("ADMIN");
+
+        ResponseUserInsert res = target.insert(req);
+        assertEquals("success", res.getType());
     }
 
     @Test
-    void testUpdate() {
-        assertDoesNotThrow(() -> {
-            RequestUserUpdate req = new RequestUserUpdate();
-            fillDto(req);
-            target.update(req);
-        });
+    void testInsert_Validation_MissingEmail() {
+        RequestUserInsert req = new RequestUserInsert();
+        ResponseUserInsert res = target.insert(req);
+        assertEquals("error", res.getType());
     }
 
     @Test
-    void testDelete() {
-        assertDoesNotThrow(() -> {
-            target.delete("test-id");
-        });
+    void testUpdate_Success() {
+        RequestUserUpdate req = new RequestUserUpdate();
+        req.setIdUser("user-id");
+        req.setFirstName("First");
+        req.setSurName("Last");
+        req.setEmail("new@test.com");
+        req.setPhone("987654321");
+        req.setRole("ADMIN");
+
+        ResponseUserUpdate res = target.update(req);
+        assertEquals("success", res.getType());
     }
 
     @Test
-    void testGetall() {
-        assertDoesNotThrow(() -> {
-            target.getall();
-        });
+    void testUpdate_NotFound() {
+        when(repositoryUser.findById(anyString())).thenReturn(Optional.empty());
+        RequestUserUpdate req = new RequestUserUpdate();
+        req.setIdUser("invalid");
+
+        ResponseUserUpdate res = target.update(req);
+        assertEquals("error", res.getType());
     }
 
     @Test
-    void testGetone() {
-        assertDoesNotThrow(() -> {
-            target.getone("test-id");
-        });
+    void testDelete_Success() {
+        ResponseUserDelete res = target.delete("user-id");
+        assertEquals("success", res.getType());
     }
 
     @Test
-    void testUploadPhoto() {
-        assertDoesNotThrow(() -> {
-            MultipartFile file = new MockMultipartFile("file", "test.txt", "text/plain", "test".getBytes());
-            target.uploadPhoto("test-id", file);
-        });
+    void testDelete_NotFound() {
+        when(repositoryUser.findById(anyString())).thenReturn(Optional.empty());
+        ResponseUserDelete res = target.delete("invalid");
+        assertEquals("error", res.getType());
     }
 
+    @Test
+    void testGetAll() {
+        ResponseUserGetAll res = target.getall();
+        assertEquals("success", res.getType());
+    }
+
+    @Test
+    void testGetOne() {
+        ResponseUserGetOne res = target.getone("user-id");
+        assertEquals("success", res.getType());
+    }
+
+    @Test
+    void testGetOne_NotFound() {
+        when(repositoryUser.findById(anyString())).thenReturn(Optional.empty());
+        ResponseUserGetOne res = target.getone("invalid");
+        assertEquals("error", res.getType());
+    }
 }

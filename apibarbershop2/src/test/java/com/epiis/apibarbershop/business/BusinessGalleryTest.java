@@ -1,21 +1,30 @@
 package com.epiis.apibarbershop.business;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import java.util.Date;
-import java.util.Optional;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
-import com.epiis.apibarbershop.repository.*;
-import com.epiis.apibarbershop.business.*;
-import com.epiis.apibarbershop.security.*;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import com.epiis.apibarbershop.service.TwilioService;
-import com.epiis.apibarbershop.dto.request.*;
+import org.springframework.test.util.ReflectionTestUtils;
+
+import com.epiis.apibarbershop.dto.request.RequestGalleryInsert;
+import com.epiis.apibarbershop.dto.request.RequestGalleryUpdate;
+import com.epiis.apibarbershop.dto.response.ResponseGalleryDelete;
+import com.epiis.apibarbershop.dto.response.ResponseGalleryGetAll;
+import com.epiis.apibarbershop.dto.response.ResponseGalleryInsert;
+import com.epiis.apibarbershop.dto.response.ResponseGalleryUpdate;
+import com.epiis.apibarbershop.entity.EntityGallery;
+import com.epiis.apibarbershop.repository.RepositoryGallery;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("all")
@@ -27,51 +36,63 @@ class BusinessGalleryTest {
     @Mock
     private RepositoryGallery repositoryGallery;
 
-    private void fillDto(Object dto) {
-        for (java.lang.reflect.Method m : dto.getClass().getMethods()) {
-            if (m.getName().startsWith("set") && m.getParameterCount() == 1) {
-                Class<?> type = m.getParameterTypes()[0];
-                try {
-                    if (type == String.class) m.invoke(dto, "999999999");
-                    else if (type == Integer.class || type == int.class) m.invoke(dto, 1);
-                    else if (type == Boolean.class || type == boolean.class) m.invoke(dto, true);
-                    else if (type == Date.class) m.invoke(dto, new Date());
-                    else if (type == Double.class || type == double.class) m.invoke(dto, 1.0);
-                } catch(Exception e) {}
-            }
-        }
+    @BeforeEach
+    void setUp() {
+        EntityGallery gallery = new EntityGallery();
+        gallery.setIdGallery("gallery-id");
+        lenient().when(repositoryGallery.findById(anyString())).thenReturn(Optional.of(gallery));
+        lenient().when(repositoryGallery.findAll()).thenReturn(List.of(gallery));
+        lenient().when(repositoryGallery.save(any())).thenReturn(gallery);
     }
 
     @Test
-    void testInsert() {
-        assertDoesNotThrow(() -> {
-            RequestGalleryInsert req = new RequestGalleryInsert();
-            fillDto(req);
-            target.insert(req);
-        });
+    void testInsert_Success() {
+        RequestGalleryInsert req = new RequestGalleryInsert();
+        req.setTitle("title");
+        req.setDescription("desc");
+        req.setImage("image");
+        ResponseGalleryInsert res = target.insert(req);
+        assertEquals("success", res.getType());
     }
 
     @Test
-    void testUpdate() {
-        assertDoesNotThrow(() -> {
-            RequestGalleryUpdate req = new RequestGalleryUpdate();
-            fillDto(req);
-            target.update(req);
-        });
+    void testUpdate_Success() {
+        RequestGalleryUpdate req = new RequestGalleryUpdate();
+        req.setIdGallery("gallery-id");
+        req.setTitle("title");
+        req.setDescription("desc");
+        req.setImage("image");
+        ResponseGalleryUpdate res = target.update(req);
+        assertEquals("success", res.getType());
     }
 
     @Test
-    void testDelete() {
-        assertDoesNotThrow(() -> {
-            target.delete("test-id");
-        });
+    void testUpdate_NotFound() {
+        when(repositoryGallery.findById("invalid")).thenReturn(Optional.empty());
+        RequestGalleryUpdate req = new RequestGalleryUpdate();
+        req.setIdGallery("invalid");
+        ResponseGalleryUpdate res = target.update(req);
+        assertEquals("error", res.getType());
+    }
+
+
+
+    @Test
+    void testDelete_Success() {
+        ResponseGalleryDelete res = target.delete("gallery-id");
+        assertEquals("success", res.getType());
     }
 
     @Test
-    void testGetall() {
-        assertDoesNotThrow(() -> {
-            target.getall();
-        });
+    void testDelete_NotFound() {
+        when(repositoryGallery.findById("invalid")).thenReturn(Optional.empty());
+        ResponseGalleryDelete res = target.delete("invalid");
+        assertEquals("error", res.getType());
     }
 
+    @Test
+    void testGetAll() {
+        ResponseGalleryGetAll res = target.getall();
+        assertEquals("success", res.getType());
+    }
 }

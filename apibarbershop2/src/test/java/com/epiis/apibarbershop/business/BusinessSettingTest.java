@@ -1,21 +1,26 @@
 package com.epiis.apibarbershop.business;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
+
+import java.sql.Time;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import java.util.Date;
-import java.util.Optional;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
-import com.epiis.apibarbershop.repository.*;
-import com.epiis.apibarbershop.business.*;
-import com.epiis.apibarbershop.security.*;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import com.epiis.apibarbershop.service.TwilioService;
-import com.epiis.apibarbershop.dto.request.*;
+
+import com.epiis.apibarbershop.dto.request.RequestSettingUpdate;
+import com.epiis.apibarbershop.dto.response.ResponseSettingGetOne;
+import com.epiis.apibarbershop.dto.response.ResponseSettingUpdate;
+import com.epiis.apibarbershop.entity.EntitySetting;
+import com.epiis.apibarbershop.repository.RepositorySetting;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("all")
@@ -27,35 +32,47 @@ class BusinessSettingTest {
     @Mock
     private RepositorySetting repositorySetting;
 
-    private void fillDto(Object dto) {
-        for (java.lang.reflect.Method m : dto.getClass().getMethods()) {
-            if (m.getName().startsWith("set") && m.getParameterCount() == 1) {
-                Class<?> type = m.getParameterTypes()[0];
-                try {
-                    if (type == String.class) m.invoke(dto, "999999999");
-                    else if (type == Integer.class || type == int.class) m.invoke(dto, 1);
-                    else if (type == Boolean.class || type == boolean.class) m.invoke(dto, true);
-                    else if (type == Date.class) m.invoke(dto, new Date());
-                    else if (type == Double.class || type == double.class) m.invoke(dto, 1.0);
-                } catch(Exception e) {}
-            }
-        }
+    @BeforeEach
+    void setUp() {
+        EntitySetting setting = new EntitySetting();
+        setting.setIdSetting("setting-id");
+        setting.setOpenHour(Time.valueOf("08:00:00"));
+        setting.setCloseHour(Time.valueOf("18:00:00"));
+        lenient().when(repositorySetting.findAll()).thenReturn(List.of(setting));
+        lenient().when(repositorySetting.save(any())).thenReturn(setting);
     }
 
     @Test
-    void testUpdate() {
-        assertDoesNotThrow(() -> {
-            RequestSettingUpdate req = new RequestSettingUpdate();
-            fillDto(req);
-            target.update(req);
-        });
+    void testGetOne_Success() {
+        ResponseSettingGetOne res = target.getone();
+        assertEquals("success", res.getType());
     }
 
     @Test
-    void testGetone() {
-        assertDoesNotThrow(() -> {
-            target.getone();
-        });
+    void testGetOne_Empty() {
+        when(repositorySetting.findAll()).thenReturn(List.of());
+        ResponseSettingGetOne res = target.getone();
+        assertEquals("error", res.getType()); 
     }
 
+    @Test
+    void testUpdate_Success() {
+        RequestSettingUpdate req = new RequestSettingUpdate();
+        req.setOpenHour("09:00");
+        req.setCloseHour("17:00");
+
+        ResponseSettingUpdate res = target.update(req);
+        assertEquals("success", res.getType());
+    }
+
+    @Test
+    void testUpdate_Empty() {
+        when(repositorySetting.findById(any())).thenReturn(Optional.empty());
+        RequestSettingUpdate req = new RequestSettingUpdate();
+        req.setOpenHour("09:00");
+        req.setCloseHour("17:00");
+
+        ResponseSettingUpdate res = target.update(req);
+        assertEquals("success", res.getType()); // Creates new setting
+    }
 }

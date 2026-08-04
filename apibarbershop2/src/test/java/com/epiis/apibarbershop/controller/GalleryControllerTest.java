@@ -1,21 +1,23 @@
 package com.epiis.apibarbershop.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import java.util.Date;
-import java.util.Optional;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
-import com.epiis.apibarbershop.repository.*;
-import com.epiis.apibarbershop.business.*;
-import com.epiis.apibarbershop.security.*;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import com.epiis.apibarbershop.service.TwilioService;
-import com.epiis.apibarbershop.dto.request.*;
+import org.springframework.http.ResponseEntity;
+
+import com.epiis.apibarbershop.business.BusinessGallery;
+import com.epiis.apibarbershop.dto.request.RequestGalleryInsert;
+import com.epiis.apibarbershop.dto.request.RequestGalleryUpdate;
+import com.epiis.apibarbershop.dto.response.*;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("all")
@@ -27,51 +29,59 @@ class GalleryControllerTest {
     @Mock
     private BusinessGallery businessGallery;
 
-    private void fillDto(Object dto) {
-        for (java.lang.reflect.Method m : dto.getClass().getMethods()) {
-            if (m.getName().startsWith("set") && m.getParameterCount() == 1) {
-                Class<?> type = m.getParameterTypes()[0];
-                try {
-                    if (type == String.class) m.invoke(dto, "999999999");
-                    else if (type == Integer.class || type == int.class) m.invoke(dto, 1);
-                    else if (type == Boolean.class || type == boolean.class) m.invoke(dto, true);
-                    else if (type == Date.class) m.invoke(dto, new Date());
-                    else if (type == Double.class || type == double.class) m.invoke(dto, 1.0);
-                } catch(Exception e) {}
-            }
-        }
+    @Test
+    void testInsert_Success() {
+        ResponseGalleryInsert resMock = new ResponseGalleryInsert();
+        when(businessGallery.insert(any())).thenReturn(resMock);
+        ResponseEntity<ResponseGalleryInsert> res = target.actionInsert(new RequestGalleryInsert());
+        assertEquals(200, res.getStatusCode().value());
     }
 
     @Test
-    void testActionInsert() {
-        assertDoesNotThrow(() -> {
-            RequestGalleryInsert req = new RequestGalleryInsert();
-            fillDto(req);
-            target.actionInsert(req);
-        });
+    void testInsert_Exception() {
+        when(businessGallery.insert(any())).thenThrow(new RuntimeException());
+        assertNull(target.actionInsert(new RequestGalleryInsert()));
     }
 
     @Test
-    void testActionUpdate() {
-        assertDoesNotThrow(() -> {
-            RequestGalleryUpdate req = new RequestGalleryUpdate();
-            fillDto(req);
-            target.actionUpdate(req);
-        });
+    void testUpdate_Success() {
+        ResponseGalleryUpdate resMock = new ResponseGalleryUpdate();
+        when(businessGallery.update(any())).thenReturn(resMock);
+        ResponseEntity<ResponseGalleryUpdate> res = target.actionUpdate(new RequestGalleryUpdate());
+        assertEquals(200, res.getStatusCode().value());
     }
 
     @Test
-    void testActionDelete() {
-        assertDoesNotThrow(() -> {
-            target.actionDelete("test-id");
-        });
+    void testUpdate_Exception() {
+        when(businessGallery.update(any())).thenThrow(new RuntimeException());
+        assertNull(target.actionUpdate(new RequestGalleryUpdate()));
     }
 
     @Test
-    void testActionGetAll() {
-        assertDoesNotThrow(() -> {
-            target.actionGetAll();
-        });
+    void testDelete_Success() {
+        ResponseGalleryDelete resMock = new ResponseGalleryDelete();
+        when(businessGallery.delete(anyString())).thenReturn(resMock);
+        ResponseEntity<ResponseGalleryDelete> res = target.actionDelete("1");
+        assertEquals(200, res.getStatusCode().value());
     }
 
+    @Test
+    void testDelete_Exception() {
+        when(businessGallery.delete(anyString())).thenThrow(new RuntimeException());
+        assertNull(target.actionDelete("1"));
+    }
+
+    @Test
+    void testGetAll_Success() {
+        ResponseGalleryGetAll resMock = new ResponseGalleryGetAll();
+        when(businessGallery.getall()).thenReturn(resMock);
+        ResponseEntity<ResponseGalleryGetAll> res = target.actionGetAll();
+        assertEquals(200, res.getStatusCode().value());
+    }
+
+    @Test
+    void testGetAll_Exception() {
+        when(businessGallery.getall()).thenThrow(new RuntimeException());
+        assertNull(target.actionGetAll());
+    }
 }

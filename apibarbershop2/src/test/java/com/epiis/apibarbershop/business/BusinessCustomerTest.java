@@ -1,21 +1,31 @@
 package com.epiis.apibarbershop.business;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import java.util.Date;
-import java.util.Optional;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
-import com.epiis.apibarbershop.repository.*;
-import com.epiis.apibarbershop.business.*;
-import com.epiis.apibarbershop.security.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import com.epiis.apibarbershop.service.TwilioService;
-import com.epiis.apibarbershop.dto.request.*;
+
+import com.epiis.apibarbershop.dto.request.RequestCustomerInsert;
+import com.epiis.apibarbershop.dto.request.RequestCustomerUpdate;
+import com.epiis.apibarbershop.dto.response.ResponseCustomerGetAll;
+import com.epiis.apibarbershop.dto.response.ResponseCustomerGetOne;
+import com.epiis.apibarbershop.dto.response.ResponseCustomerInsert;
+import com.epiis.apibarbershop.dto.response.ResponseCustomerUpdate;
+import com.epiis.apibarbershop.entity.EntityCustomer;
+import com.epiis.apibarbershop.repository.RepositoryCustomer;
+import com.epiis.apibarbershop.repository.RepositoryUser;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("all")
@@ -26,62 +36,78 @@ class BusinessCustomerTest {
 
     @Mock
     private RepositoryCustomer repositoryCustomer;
-
+    
     @Mock
     private RepositoryUser repositoryUser;
 
-    private void fillDto(Object dto) {
-        for (java.lang.reflect.Method m : dto.getClass().getMethods()) {
-            if (m.getName().startsWith("set") && m.getParameterCount() == 1) {
-                Class<?> type = m.getParameterTypes()[0];
-                try {
-                    if (type == String.class) m.invoke(dto, "999999999");
-                    else if (type == Integer.class || type == int.class) m.invoke(dto, 1);
-                    else if (type == Boolean.class || type == boolean.class) m.invoke(dto, true);
-                    else if (type == Date.class) m.invoke(dto, new Date());
-                    else if (type == Double.class || type == double.class) m.invoke(dto, 1.0);
-                } catch(Exception e) {}
-            }
-        }
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @BeforeEach
+    void setUp() {
+        EntityCustomer customer = new EntityCustomer();
+        customer.setIdCustomer("customer-id");
+        customer.setEmail("test@test.com");
+        customer.setPhone("123456789");
+        lenient().when(repositoryCustomer.findById(anyString())).thenReturn(Optional.of(customer));
+        lenient().when(repositoryCustomer.findAll()).thenReturn(List.of(customer));
+        lenient().when(repositoryCustomer.save(any())).thenReturn(customer);
+        lenient().when(passwordEncoder.encode(anyString())).thenReturn("encoded-password");
+        
+        lenient().when(repositoryUser.findByEmail(anyString())).thenReturn(Optional.empty());
+        lenient().when(repositoryUser.findByPhone(anyString())).thenReturn(Optional.empty());
+        lenient().when(repositoryCustomer.findByEmail(anyString())).thenReturn(Optional.empty());
+        lenient().when(repositoryCustomer.findByPhone(anyString())).thenReturn(Optional.empty());
     }
 
     @Test
-    void testInsert() {
-        assertDoesNotThrow(() -> {
-            RequestCustomerInsert req = new RequestCustomerInsert();
-            fillDto(req);
-            target.insert(req);
-        });
+    void testInsert_Success() {
+        RequestCustomerInsert req = new RequestCustomerInsert();
+        req.setFirstName("First");
+        req.setSurName("Last");
+        req.setEmail("new@test.com");
+        req.setPhone("987654321");
+        // req.setPassword("Password123"); password is in User entity not CustomerInsert wait
+        ResponseCustomerInsert res = target.insert(req);
+        assertEquals("success", res.getType());
     }
 
     @Test
-    void testUpdate() {
-        assertDoesNotThrow(() -> {
-            RequestCustomerUpdate req = new RequestCustomerUpdate();
-            fillDto(req);
-            target.update(req);
-        });
+    void testInsert_Validation() {
+        RequestCustomerInsert req = new RequestCustomerInsert(); // Empty
+        ResponseCustomerInsert res = target.insert(req);
+        assertEquals("error", res.getType());
     }
 
     @Test
-    void testDelete() {
-        assertDoesNotThrow(() -> {
-            target.delete("test-id");
-        });
+    void testUpdate_Success() {
+        RequestCustomerUpdate req = new RequestCustomerUpdate();
+        req.setIdCustomer("customer-id");
+        req.setFirstName("First");
+        req.setSurName("Last");
+        req.setEmail("new@test.com");
+        req.setPhone("987654321");
+        ResponseCustomerUpdate res = target.update(req);
+        assertEquals("success", res.getType());
     }
 
     @Test
-    void testGetall() {
-        assertDoesNotThrow(() -> {
-            target.getall();
-        });
+    void testUpdate_Validation() {
+        RequestCustomerUpdate req = new RequestCustomerUpdate();
+        req.setIdCustomer("customer-id");
+        ResponseCustomerUpdate res = target.update(req);
+        assertEquals("error", res.getType());
     }
 
     @Test
-    void testGetone() {
-        assertDoesNotThrow(() -> {
-            target.getone("test-id");
-        });
+    void testGetAll() {
+        ResponseCustomerGetAll res = target.getall();
+        assertEquals("success", res.getType());
     }
 
+    @Test
+    void testGetOne() {
+        ResponseCustomerGetOne res = target.getone("customer-id");
+        assertEquals("success", res.getType());
+    }
 }

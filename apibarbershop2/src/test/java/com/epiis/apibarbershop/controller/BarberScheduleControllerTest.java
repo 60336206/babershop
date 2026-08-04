@@ -1,21 +1,23 @@
 package com.epiis.apibarbershop.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import java.util.Date;
-import java.util.Optional;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
-import com.epiis.apibarbershop.repository.*;
-import com.epiis.apibarbershop.business.*;
-import com.epiis.apibarbershop.security.*;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import com.epiis.apibarbershop.service.TwilioService;
-import com.epiis.apibarbershop.dto.request.*;
+import org.springframework.http.ResponseEntity;
+
+import com.epiis.apibarbershop.business.BusinessBarberSchedule;
+import com.epiis.apibarbershop.dto.request.RequestBarberScheduleInsert;
+import com.epiis.apibarbershop.dto.request.RequestBarberScheduleUpdate;
+import com.epiis.apibarbershop.dto.response.*;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("all")
@@ -27,65 +29,87 @@ class BarberScheduleControllerTest {
     @Mock
     private BusinessBarberSchedule businessBarberSchedule;
 
-    private void fillDto(Object dto) {
-        for (java.lang.reflect.Method m : dto.getClass().getMethods()) {
-            if (m.getName().startsWith("set") && m.getParameterCount() == 1) {
-                Class<?> type = m.getParameterTypes()[0];
-                try {
-                    if (type == String.class) m.invoke(dto, "999999999");
-                    else if (type == Integer.class || type == int.class) m.invoke(dto, 1);
-                    else if (type == Boolean.class || type == boolean.class) m.invoke(dto, true);
-                    else if (type == Date.class) m.invoke(dto, new Date());
-                    else if (type == Double.class || type == double.class) m.invoke(dto, 1.0);
-                } catch(Exception e) {}
-            }
-        }
+    @Test
+    void testInsert_Success() {
+        ResponseBarberScheduleInsert resMock = new ResponseBarberScheduleInsert();
+        when(businessBarberSchedule.insert(any())).thenReturn(resMock);
+        ResponseEntity<ResponseBarberScheduleInsert> res = target.actionInsert(new RequestBarberScheduleInsert());
+        assertEquals(200, res.getStatusCode().value());
     }
 
     @Test
-    void testActionInsert() {
-        assertDoesNotThrow(() -> {
-            RequestBarberScheduleInsert req = new RequestBarberScheduleInsert();
-            fillDto(req);
-            target.actionInsert(req);
-        });
+    void testInsert_Exception() {
+        when(businessBarberSchedule.insert(any())).thenThrow(new RuntimeException());
+        assertNull(target.actionInsert(new RequestBarberScheduleInsert()));
     }
 
     @Test
-    void testActionUpdate() {
-        assertDoesNotThrow(() -> {
-            RequestBarberScheduleUpdate req = new RequestBarberScheduleUpdate();
-            fillDto(req);
-            target.actionUpdate(req);
-        });
+    void testUpdate_Success() {
+        ResponseBarberScheduleUpdate resMock = new ResponseBarberScheduleUpdate();
+        when(businessBarberSchedule.update(any())).thenReturn(resMock);
+        ResponseEntity<ResponseBarberScheduleUpdate> res = target.actionUpdate(new RequestBarberScheduleUpdate());
+        assertEquals(200, res.getStatusCode().value());
     }
 
     @Test
-    void testActionDelete() {
-        assertDoesNotThrow(() -> {
-            target.actionDelete("test-id");
-        });
+    void testUpdate_Exception() {
+        when(businessBarberSchedule.update(any())).thenThrow(new RuntimeException());
+        assertNull(target.actionUpdate(new RequestBarberScheduleUpdate()));
     }
 
     @Test
-    void testActionGetAll() {
-        assertDoesNotThrow(() -> {
-            target.actionGetAll();
-        });
+    void testDelete_Success() {
+        ResponseBarberScheduleDelete resMock = new ResponseBarberScheduleDelete();
+        when(businessBarberSchedule.delete(anyString())).thenReturn(resMock);
+        ResponseEntity<ResponseBarberScheduleDelete> res = target.actionDelete("1");
+        assertEquals(200, res.getStatusCode().value());
     }
 
     @Test
-    void testActionGetByBarber() {
-        assertDoesNotThrow(() -> {
-            target.actionGetByBarber("test-id");
-        });
+    void testDelete_Exception() {
+        when(businessBarberSchedule.delete(anyString())).thenThrow(new RuntimeException());
+        assertNull(target.actionDelete("1"));
     }
 
     @Test
-    void testActionGetAvailableHours() {
-        assertDoesNotThrow(() -> {
-            target.actionGetAvailableHours("test-id", "test-id");
-        });
+    void testGetAll_Success() {
+        ResponseBarberScheduleGetAll resMock = new ResponseBarberScheduleGetAll();
+        when(businessBarberSchedule.getall()).thenReturn(resMock);
+        ResponseEntity<ResponseBarberScheduleGetAll> res = target.actionGetAll();
+        assertEquals(200, res.getStatusCode().value());
     }
 
+    @Test
+    void testGetAll_Exception() {
+        when(businessBarberSchedule.getall()).thenThrow(new RuntimeException());
+        assertNull(target.actionGetAll());
+    }
+
+    @Test
+    void testGetByBarber_Success() {
+        ResponseBarberScheduleGetAll resMock = new ResponseBarberScheduleGetAll();
+        when(businessBarberSchedule.getbybarber(anyString())).thenReturn(resMock);
+        ResponseEntity<ResponseBarberScheduleGetAll> res = target.actionGetByBarber("1");
+        assertEquals(200, res.getStatusCode().value());
+    }
+
+    @Test
+    void testGetByBarber_Exception() {
+        when(businessBarberSchedule.getbybarber(anyString())).thenThrow(new RuntimeException());
+        assertNull(target.actionGetByBarber("1"));
+    }
+
+    @Test
+    void testAvailableHours_Success() {
+        ResponseAvailableHours resMock = new ResponseAvailableHours();
+        when(businessBarberSchedule.getAvailableHours(anyString(), anyString())).thenReturn(resMock);
+        ResponseEntity<ResponseAvailableHours> res = target.actionGetAvailableHours("1", "2026-08-01");
+        assertEquals(200, res.getStatusCode().value());
+    }
+
+    @Test
+    void testAvailableHours_Exception() {
+        when(businessBarberSchedule.getAvailableHours(anyString(), anyString())).thenThrow(new RuntimeException());
+        assertNull(target.actionGetAvailableHours("1", "2026-08-01"));
+    }
 }
