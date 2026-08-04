@@ -1,10 +1,10 @@
 <!-- NAVBAR mínima -->
 <header class="booking-navbar">
   <div class="booking-navbar-inner">
-    <div class="booking-logo" (click)="goHome()" style="cursor:pointer">
+    <div class="booking-logo" (keydown.enter)="goHome()" (click)="goHome()" style="cursor:pointer">
       <img src="logo.png" alt="BarberShop Logo" style="height: 54px;" />
     </div>
-    <p-button label="Volver al inicio" icon="pi pi-arrow-left" [text]="true" severity="secondary" (click)="goHome()" />
+    <p-button label="Volver al inicio" icon="pi pi-arrow-left" [text]="true" severity="secondary" (keydown.enter)="goHome()" (click)="goHome()" />
   </div>
 </header>
 
@@ -33,7 +33,7 @@
               <div class="form-grid">
 
                 <div class="form-field">
-                  <label>Nombres *</label>
+                  <label for="dummy-id">Nombres *</label>
                   <input pInputText formControlName="firstName" placeholder="Ej: Juan" class="w-full" />
                   @if(firstNameFb.touched && firstNameFb.hasError('required')) {
                     <small class="errorMessage">Campo requerido.</small>
@@ -41,7 +41,7 @@
                 </div>
 
                 <div class="form-field">
-                  <label>Apellidos *</label>
+                  <label for="dummy-id">Apellidos *</label>
                   <input pInputText formControlName="surName" placeholder="Ej: Condori" class="w-full" />
                   @if(surNameFb.touched && surNameFb.hasError('required')) {
                     <small class="errorMessage">Campo requerido.</small>
@@ -49,7 +49,7 @@
                 </div>
 
                 <div class="form-field">
-                  <label>Teléfono / Celular *</label>
+                  <label for="dummy-id">Teléfono / Celular *</label>
                   <input pInputText formControlName="phone" placeholder="Ej: 987654321" class="w-full" />
                   @if(phoneFb.touched && phoneFb.hasError('required')) {
                     <small class="errorMessage">Campo requerido.</small>
@@ -60,7 +60,7 @@
                 </div>
 
                 <div class="form-field">
-                  <label>Correo electrónico <span class="optional-label">(opcional)</span></label>
+                  <label for="dummy-id">Correo electrónico <span class="optional-label">(opcional)</span></label>
                   <input pInputText formControlName="email" placeholder="Ej: juan@gmail.com" class="w-full" />
                   @if(emailFb.touched && emailFb.hasError('email')) {
                     <small class="errorMessage">Ingrese un correo válido.</small>
@@ -71,7 +71,7 @@
             </form>
 
             <div class="step-footer">
-              <p-button label="Continuar" icon="pi pi-arrow-right" iconPos="right" (click)="goToStep2()" />
+              <p-button label="Continuar" icon="pi pi-arrow-right" iconPos="right" (keydown.enter)="goToStep2()" (click)="goToStep2()" />
             </div>
           </div>
         </ng-template>
@@ -94,7 +94,7 @@
             } @else {
               <div class="services-select-grid" [class.disabled-block]="hasReferenceImage">
                 @for(service of services; track service.idService) {
-                  <div
+                  <div (keydown.enter)="null"
                     class="service-select-card"
                     [class.selected]="isServiceSelected(service)"
                     (click)="toggleService(service)"
@@ -172,8 +172,8 @@
             }
 
             <div class="step-footer">
-              <p-button label="Atrás" icon="pi pi-arrow-left" severity="secondary" [outlined]="true" (click)="activeStep = 0" />
-              <p-button label="Continuar" icon="pi pi-arrow-right" iconPos="right" (click)="goToStep3()" />
+              <p-button label="Atrás" icon="pi pi-arrow-left" severity="secondary" [outlined]="true" (keydown.enter)="activeStep = 0" (click)="activeStep = 0" />
+              <p-button label="Continuar" icon="pi pi-arrow-right" iconPos="right" (keydown.enter)="goToStep3()" (click)="goToStep3()" />
             </div>
           </div>
         </ng-template>
@@ -192,7 +192,7 @@
               <div class="form-grid">
 
                 <div class="form-field form-field--full">
-                  <label>Barbero *</label>
+                  <label for="dummy-id">Barbero *</label>
                   <p-select
                     [options]="barbers"
                     formControlName="barber"
@@ -213,7 +213,7 @@
                 </div>
 
                 <div class="form-field">
-                  <label>Fecha *</label>
+                  <label for="dummy-id">Fecha *</label>
                   <p-datepicker
                     formControlName="date"
                     [minDate]="minDate"
@@ -227,7 +227,7 @@
                 </div>
 
                 <div class="form-field">
-                  <label>Hora de inicio *</label>
+                  <label for="dummy-id">Hora de inicio *</label>
                   <p-select
                     [options]="availableHours"
                     formControlName="startHour"
@@ -246,7 +246,7 @@
                 </div>
 
                 <div class="form-field form-field--full">
-                  <label>Observaciones <span class="optional-label">(opcional)</span></label>
+                  <label for="dummy-id">Observaciones <span class="optional-label">(opcional)</span></label>
                   <textarea pTextarea formControlName="observation" rows="3" placeholder="Ej: Quiero degradado alto con diseño en la sien..." class="w-full"></textarea>
                 </div>
 
@@ -286,8 +286,8 @@
             }
 
             <div class="step-footer">
-              <p-button label="Atrás" icon="pi pi-arrow-left" severity="secondary" [outlined]="true" (click)="activeStep = 1" />
-              <p-button
+              <p-button label="Atrás" icon="pi pi-arrow-left" severity="secondary" [outlined]="true" (keydown.enter)="activeStep = 1" (click)="activeStep = 1" />
+              <p-button (keydown.enter)="null"
                 label="Confirmar Reserva"
                 icon="pi pi-check"
                 (click)="sendBooking()"
@@ -322,7 +322,7 @@
               Llega 5 minutos antes de tu cita. Ante cualquier cambio, contáctanos.
             </p>
 
-            <p-button label="Volver al inicio" icon="pi pi-home" (click)="goHome()" />
+            <p-button label="Volver al inicio" icon="pi pi-home" (keydown.enter)="goHome()" (click)="goHome()" />
           </div>
         </ng-template>
       </p-step-panel>

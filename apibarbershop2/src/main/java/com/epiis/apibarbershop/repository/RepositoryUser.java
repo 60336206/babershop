@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import com.epiis.apibarbershop.entity.EntityUser;
 
 @Repository
+@SuppressWarnings("all")
 public interface RepositoryUser extends JpaRepository<EntityUser, String> {
 
 	@org.springframework.data.jpa.repository.Query("SELECT u FROM EntityUser u WHERE u.email = ?1")

@@ -1,5 +1,6 @@
 package com.epiis.apibarbershop.business;
 
+import com.epiis.apibarbershop.generic.ValidationConstants;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,6 +24,7 @@ import com.epiis.apibarbershop.repository.RepositoryCustomer;
 import com.epiis.apibarbershop.staticdata.EnumStatus;
 
 @Service
+@SuppressWarnings("all")
 public class BusinessUser {
 	private final RepositoryUser repositoryUser;
 	private final RepositoryCustomer repositoryCustomer;
@@ -42,10 +44,10 @@ public class BusinessUser {
 
 		// Validaciones obligatorias
 		if (request.getFirstName() == null || request.getFirstName().trim().length() < 3) {
-			response.listMessage.add("El nombre es obligatorio y debe tener al menos 3 caracteres.");
+			response.listMessage.add(ValidationConstants.MSG_NAME_INVALID);
 		}
 		if (request.getSurName() == null || request.getSurName().trim().length() < 3) {
-			response.listMessage.add("El apellido es obligatorio y debe tener al menos 3 caracteres.");
+			response.listMessage.add(ValidationConstants.MSG_SURNAME_INVALID);
 		}
 		if (!isValidEmail(request.getEmail())) {
 			response.listMessage.add("Correo electrónico inválido o vacío.");
@@ -57,7 +59,7 @@ public class BusinessUser {
 			response.listMessage.add("El rol debe ser ADMIN o BARBER.");
 		}
 		if (request.getPhone() == null || request.getPhone().trim().isEmpty()) {
-			response.listMessage.add("El teléfono es obligatorio.");
+			response.listMessage.add(ValidationConstants.MSG_PHONE_REQUIRED);
 		}
 		
 		if (!response.listMessage.isEmpty()) {
@@ -65,12 +67,12 @@ public class BusinessUser {
 		}
 
 		if (repositoryUser.findByEmail(request.getEmail()).isPresent() || repositoryCustomer.findByEmail(request.getEmail()).isPresent()) {
-			response.listMessage.add("El correo ya está registrado en el sistema.");
+			response.listMessage.add(ValidationConstants.MSG_EMAIL_EXISTS);
 			return response;
 		}
 
 		if (repositoryUser.findByPhone(request.getPhone()).isPresent() || repositoryCustomer.findByPhone(request.getPhone()).isPresent()) {
-			response.listMessage.add("El teléfono ya está registrado en el sistema.");
+			response.listMessage.add(ValidationConstants.MSG_PHONE_EXISTS);
 			return response;
 		}
 
@@ -105,16 +107,16 @@ public class BusinessUser {
 
 		Optional<EntityUser> optional = repositoryUser.findById(request.getIdUser());
 		if (optional.isEmpty()) {
-			response.listMessage.add("Usuario no encontrado.");
+			response.listMessage.add(ValidationConstants.MSG_USER_NOT_FOUND);
 			return response;
 		}
 
 		// Validaciones obligatorias
 		if (request.getFirstName() == null || request.getFirstName().trim().length() < 3) {
-			response.listMessage.add("El nombre es obligatorio y debe tener al menos 3 caracteres.");
+			response.listMessage.add(ValidationConstants.MSG_NAME_INVALID);
 		}
 		if (request.getSurName() == null || request.getSurName().trim().length() < 3) {
-			response.listMessage.add("El apellido es obligatorio y debe tener al menos 3 caracteres.");
+			response.listMessage.add(ValidationConstants.MSG_SURNAME_INVALID);
 		}
 		if (!isValidEmail(request.getEmail())) {
 			response.listMessage.add("Correo electrónico inválido o vacío.");
@@ -123,7 +125,7 @@ public class BusinessUser {
 			response.listMessage.add("El rol debe ser ADMIN o BARBER.");
 		}
 		if (request.getPhone() == null || request.getPhone().trim().isEmpty()) {
-			response.listMessage.add("El teléfono es obligatorio.");
+			response.listMessage.add(ValidationConstants.MSG_PHONE_REQUIRED);
 		}
 		
 		if (!response.listMessage.isEmpty()) {
@@ -133,21 +135,21 @@ public class BusinessUser {
 		// Validar si email o phone pertenecen a OTRO usuario
 		Optional<EntityUser> existingEmail = repositoryUser.findByEmail(request.getEmail());
 		if (existingEmail.isPresent() && !existingEmail.get().getIdUser().equals(request.getIdUser())) {
-			response.listMessage.add("El correo ya está registrado en el sistema.");
+			response.listMessage.add(ValidationConstants.MSG_EMAIL_EXISTS);
 			return response;
 		}
 		if (repositoryCustomer.findByEmail(request.getEmail()).isPresent()) {
-			response.listMessage.add("El correo ya está registrado en el sistema.");
+			response.listMessage.add(ValidationConstants.MSG_EMAIL_EXISTS);
 			return response;
 		}
 
 		Optional<EntityUser> existingPhone = repositoryUser.findByPhone(request.getPhone());
 		if (existingPhone.isPresent() && !existingPhone.get().getIdUser().equals(request.getIdUser())) {
-			response.listMessage.add("El teléfono ya está registrado en el sistema.");
+			response.listMessage.add(ValidationConstants.MSG_PHONE_EXISTS);
 			return response;
 		}
 		if (repositoryCustomer.findByPhone(request.getPhone()).isPresent()) {
-			response.listMessage.add("El teléfono ya está registrado en el sistema.");
+			response.listMessage.add(ValidationConstants.MSG_PHONE_EXISTS);
 			return response;
 		}
 
@@ -175,7 +177,7 @@ public class BusinessUser {
 
 		Optional<EntityUser> optional = repositoryUser.findById(idUser);
 		if (optional.isEmpty()) {
-			response.listMessage.add("Usuario no encontrado.");
+			response.listMessage.add(ValidationConstants.MSG_USER_NOT_FOUND);
 			return response;
 		}
 
@@ -200,7 +202,7 @@ public class BusinessUser {
 
 		Optional<EntityUser> optional = repositoryUser.findById(idUser);
 		if (optional.isEmpty()) {
-			response.listMessage.add("Usuario no encontrado.");
+			response.listMessage.add(ValidationConstants.MSG_USER_NOT_FOUND);
 			return response;
 		}
 
@@ -258,7 +260,7 @@ public class BusinessUser {
 		// Validar usuario
 		Optional<EntityUser> optional = repositoryUser.findById(idUser);
 		if (optional.isEmpty()) {
-			response.listMessage.add("Usuario no encontrado.");
+			response.listMessage.add(ValidationConstants.MSG_USER_NOT_FOUND);
 			return response;
 		}
 

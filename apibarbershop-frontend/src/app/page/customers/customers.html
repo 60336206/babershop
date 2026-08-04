@@ -9,7 +9,7 @@
     </div>
   </ng-template>
   <ng-template #end>
-    <p-button label="Nuevo Cliente" icon="pi pi-user-plus" (click)="openNew()" />
+    <p-button label="Nuevo Cliente" icon="pi pi-user-plus" (keydown.enter)="openNew()" (click)="openNew()" />
   </ng-template>
 </p-toolbar>
 
@@ -44,11 +44,11 @@
 
     <ng-template #header>
       <tr>
-        <th pSortableColumn="firstName">Nombre <p-sortIcon field="firstName" /></th>
-        <th pSortableColumn="phone">Teléfono <p-sortIcon field="phone" /></th>
-        <th>Correo</th>
-        <th>Estado</th>
-        <th class="text-center" style="width:130px">Acciones</th>
+        <th scope="col" pSortableColumn="firstName">Nombre <p-sortIcon field="firstName" /></th>
+        <th scope="col" pSortableColumn="phone">Teléfono <p-sortIcon field="phone" /></th>
+        <th scope="col">Correo</th>
+        <th scope="col">Estado</th>
+        <th scope="col" class="text-center" style="width:130px">Acciones</th>
       </tr>
     </ng-template>
 
@@ -77,7 +77,7 @@
               [value]="customer.status === 1 ? 'Activo' : 'Inactivo'"
               [severity]="getStatusSeverity(customer.status)"
             />
-            <p-button
+            <p-button (keydown.enter)="null"
               [icon]="customer.status === 1 ? 'pi pi-power-off' : 'pi pi-check'"
               [rounded]="true"
               [text]="true"
@@ -121,7 +121,7 @@
     <div class="form-grid">
 
       <div class="form-field">
-        <label>Nombres *</label>
+        <label for="dummy-id">Nombres *</label>
         <input pInputText formControlName="firstName" placeholder="Ej: María" class="w-full" />
         @if(firstNameFb.touched && firstNameFb.hasError('required')) {
           <small class="errorMessage">Campo requerido.</small>
@@ -129,7 +129,7 @@
       </div>
 
       <div class="form-field">
-        <label>Apellidos *</label>
+        <label for="dummy-id">Apellidos *</label>
         <input pInputText formControlName="surName" placeholder="Ej: Mamani" class="w-full" />
         @if(surNameFb.touched && surNameFb.hasError('required')) {
           <small class="errorMessage">Campo requerido.</small>
@@ -137,7 +137,7 @@
       </div>
 
       <div class="form-field form-field--full">
-        <label>Teléfono / Celular *</label>
+        <label for="dummy-id">Teléfono / Celular *</label>
         <input pInputText formControlName="phone" placeholder="Ej: 987654321" class="w-full" />
         @if(phoneFb.touched && phoneFb.hasError('required')) {
           <small class="errorMessage">Campo requerido.</small>
@@ -148,7 +148,7 @@
       </div>
 
       <div class="form-field form-field--full">
-        <label>Correo electrónico <span class="optional-label">(opcional)</span></label>
+        <label for="dummy-id">Correo electrónico <span class="optional-label">(opcional)</span></label>
         <input pInputText formControlName="email" type="email" placeholder="Ej: maria@gmail.com" class="w-full" />
         @if(emailFb.touched && emailFb.hasError('email')) {
           <small class="errorMessage">Ingrese un correo válido.</small>
@@ -157,7 +157,7 @@
 
       @if(isEditing) {
         <div class="form-field form-field--full">
-          <label>Estado *</label>
+          <label for="dummy-id">Estado *</label>
           <p-select
             [options]="statusOptions"
             formControlName="status"

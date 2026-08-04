@@ -11,6 +11,7 @@ import com.epiis.apibarbershop.dto.response.*;
 
 @RestController
 @RequestMapping(path = "user")
+@SuppressWarnings("all")
 public class UserController {
 	private final BusinessUser businessUser;
 

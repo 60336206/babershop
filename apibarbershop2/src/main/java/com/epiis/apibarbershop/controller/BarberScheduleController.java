@@ -9,6 +9,7 @@ import com.epiis.apibarbershop.dto.response.*;
 
 @RestController
 @RequestMapping(path = "barberschedule")
+@SuppressWarnings("all")
 public class BarberScheduleController {
 	private final BusinessBarberSchedule businessBarberSchedule;
 

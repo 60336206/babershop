@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { ButtonModule } from 'primeng/button';
@@ -15,40 +16,7 @@ import { AvatarModule } from 'primeng/avatar';
 import { ConfirmationService, MessageService } from 'primeng/api';
 
 import { Api } from '../../api/api';
-import { apiusergetall } from '../../api/functions';
-
-// API fn inline (mismos patrones que apicustomerinsert del proyecto)
-import { HttpClient, HttpContext, HttpResponse } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
-import { StrictHttpResponse } from '../../api/strict-http-response';
-import { RequestBuilder } from '../../api/request-builder';
-
-function apiuserinsert(http: HttpClient, rootUrl: string, params: { body: any }, context?: HttpContext): Observable<StrictHttpResponse<any>> {
-  const rb = new RequestBuilder(rootUrl, '/user/insert', 'post');
-  rb.body(params.body, 'application/json');
-  return http.request(rb.build({ responseType: 'json', accept: 'application/json', context })).pipe(
-    filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
-    map((r: HttpResponse<any>) => r as StrictHttpResponse<any>)
-  );
-}
-
-function apiuserupdate(http: HttpClient, rootUrl: string, params: { body: any }, context?: HttpContext): Observable<StrictHttpResponse<any>> {
-  const rb = new RequestBuilder(rootUrl, '/user/update', 'put');
-  rb.body(params.body, 'application/json');
-  return http.request(rb.build({ responseType: 'json', accept: 'application/json', context })).pipe(
-    filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
-    map((r: HttpResponse<any>) => r as StrictHttpResponse<any>)
-  );
-}
-
-function apiuserdelete(http: HttpClient, rootUrl: string, params: { idUser: string }, context?: HttpContext): Observable<StrictHttpResponse<any>> {
-  const rb = new RequestBuilder(rootUrl, `/user/delete/${params.idUser}`, 'delete');
-  return http.request(rb.build({ responseType: 'json', accept: 'application/json', context })).pipe(
-    filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
-    map((r: HttpResponse<any>) => r as StrictHttpResponse<any>)
-  );
-}
+import { apiusergetall, apiuserinsert, apiuserupdate, apiuserdelete } from '../../api/functions';
 
 import { noWhitespaceValidator } from '../../shared/validators/no-whitespace.validator';
 

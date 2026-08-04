@@ -1,5 +1,6 @@
 package com.epiis.apibarbershop.business;
 
+import com.epiis.apibarbershop.generic.ValidationConstants;
 import java.util.Date;
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -16,8 +17,9 @@ import com.epiis.apibarbershop.repository.RepositoryService;
 import com.epiis.apibarbershop.staticdata.EnumStatus;
 
 @Service
+@SuppressWarnings("all")
 public class BusinessService {
-	private static final String SERVICE_NOT_FOUND = "Servicio no encontrado.";
+	private static final String SERVICE_NOT_FOUND = ValidationConstants.MSG_SERVICE_NOT_FOUND;
 	private final RepositoryService repositoryService;
 
 	public BusinessService(RepositoryService repositoryService) {

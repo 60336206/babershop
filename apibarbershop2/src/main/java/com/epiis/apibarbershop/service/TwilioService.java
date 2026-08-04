@@ -1,5 +1,7 @@
 package com.epiis.apibarbershop.service;
 
+import lombok.extern.slf4j.Slf4j;
+import com.epiis.apibarbershop.generic.ValidationConstants;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
@@ -9,6 +11,8 @@ import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 
 @Service
+@Slf4j
+@SuppressWarnings("all")
 public class TwilioService {
 
     @Value("${twilio.account-sid-p1}")
@@ -31,7 +35,7 @@ public class TwilioService {
     public void sendConfirmationSms(String toPhone, String customerName, String date, String time) {
         new Thread(() -> {
             try {
-                System.out.println("[TWILIO] Iniciando envío de SMS a: " + toPhone);
+                log.info("[TWILIO] Iniciando envío de SMS a: " + toPhone);
 
                 // Quitar espacios vacíos que el usuario pueda haber introducido
                 String cleanPhone = toPhone.replaceAll("\\s+", "");
@@ -39,9 +43,9 @@ public class TwilioService {
                 // Asegurar formato internacional para el teléfono (asume Perú +51)
                 String formattedPhone = cleanPhone.startsWith("+") ? cleanPhone : "+51" + cleanPhone;
 
-                // Agregar prefijo "whatsapp:" para usar el Sandbox de Twilio WhatsApp
-                String whatsappTo = "whatsapp:" + formattedPhone;
-                String whatsappFrom = fromNumber.startsWith("whatsapp:") ? fromNumber : "whatsapp:" + fromNumber;
+                // Agregar prefijo ValidationConstants.WHATSAPP_PREFIX para usar el Sandbox de Twilio WhatsApp
+                String whatsappTo = ValidationConstants.WHATSAPP_PREFIX + formattedPhone;
+                String whatsappFrom = fromNumber.startsWith(ValidationConstants.WHATSAPP_PREFIX) ? fromNumber : ValidationConstants.WHATSAPP_PREFIX + fromNumber;
 
                 String text = String.format("Hola %s, tu reserva en BarberShop para el %s a las %s ha sido CONFIRMADA. ¡Te esperamos!", 
                         customerName, date, time);
@@ -52,9 +56,9 @@ public class TwilioService {
                         text
                 ).create();
 
-                System.out.println("[TWILIO] ✅ WhatsApp enviado exitosamente con SID: " + message.getSid());
+                log.info("[TWILIO] ✅ WhatsApp enviado exitosamente con SID: " + message.getSid());
             } catch (Exception e) {
-                System.err.println("[TWILIO] ❌ Error al enviar WhatsApp a " + toPhone + ": " + e.getMessage());
+                log.error("[TWILIO] ❌ Error al enviar WhatsApp a " + toPhone + ": " + e.getMessage());
                 e.printStackTrace();
             }
         }).start();

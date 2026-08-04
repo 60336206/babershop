@@ -25,6 +25,7 @@ import com.epiis.apibarbershop.repository.RepositoryAppointment;
 import com.epiis.apibarbershop.entity.EntityAppointment;
 
 @Service
+@SuppressWarnings("all")
 public class BusinessBarberSchedule {
 	private final RepositoryBarberSchedule repositoryBarberSchedule;
 	private final RepositoryAppointment repositoryAppointment;

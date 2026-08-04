@@ -15,39 +15,7 @@ import { SelectModule } from 'primeng/select';
 import { ConfirmationService, MessageService } from 'primeng/api';
 
 import { Api } from '../../api/api';
-import { apiservicegetall } from '../../api/functions';
-
-import { HttpClient, HttpContext, HttpResponse } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
-import { StrictHttpResponse } from '../../api/strict-http-response';
-import { RequestBuilder } from '../../api/request-builder';
-
-function apiserviceinsert(http: HttpClient, rootUrl: string, params: { body: any }, context?: HttpContext): Observable<StrictHttpResponse<any>> {
-  const rb = new RequestBuilder(rootUrl, '/service/insert', 'post');
-  rb.body(params.body, 'application/json');
-  return http.request(rb.build({ responseType: 'json', accept: 'application/json', context })).pipe(
-    filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
-    map((r: HttpResponse<any>) => r as StrictHttpResponse<any>)
-  );
-}
-
-function apiserviceupdate(http: HttpClient, rootUrl: string, params: { body: any }, context?: HttpContext): Observable<StrictHttpResponse<any>> {
-  const rb = new RequestBuilder(rootUrl, '/service/update', 'put');
-  rb.body(params.body, 'application/json');
-  return http.request(rb.build({ responseType: 'json', accept: 'application/json', context })).pipe(
-    filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
-    map((r: HttpResponse<any>) => r as StrictHttpResponse<any>)
-  );
-}
-
-function apiservicedelete(http: HttpClient, rootUrl: string, params: { idService: string }, context?: HttpContext): Observable<StrictHttpResponse<any>> {
-  const rb = new RequestBuilder(rootUrl, `/service/delete/${params.idService}`, 'delete');
-  return http.request(rb.build({ responseType: 'json', accept: 'application/json', context })).pipe(
-    filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
-    map((r: HttpResponse<any>) => r as StrictHttpResponse<any>)
-  );
-}
+import { apiservicegetall, apiserviceinsert, apiserviceupdate, apiservicedelete } from '../../api/functions';
 
 import { noWhitespaceValidator } from '../../shared/validators/no-whitespace.validator';
 
@@ -225,7 +193,7 @@ export class Services implements OnInit {
       ? { idService: v.idService, name: v.name, description: v.description, price: v.price, durationMinutes: v.durationMinutes, image: v.image ?? '', status: v.status }
       : { name: v.name, description: v.description, price: v.price, durationMinutes: v.durationMinutes, image: v.image ?? '', status: v.status };
 
-    this.api.invoke(fn, { body }).then((response: any) => {
+    this.api.invoke(fn as any, { body }).then((response: any) => {
       const data = typeof response === 'string' ? JSON.parse(response) : response;
       if (data?.type === 'success') {
         this.messageService.add({ severity: 'success', summary: 'Correcto', detail: data.listMessage?.[0] ?? 'Servicio guardado.' });

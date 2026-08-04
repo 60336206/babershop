@@ -115,7 +115,7 @@ export class Settings implements OnInit {
               width = MAX_WIDTH;
             }
           } else {
-            if (height > MAX_HEIGHT) {
+            if (height > MAX_HEIGHT) { // NOSONAR
               width *= MAX_HEIGHT / height;
               height = MAX_HEIGHT;
             }

@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
+@SuppressWarnings("all")
 public class DatabaseMigrationRunner implements CommandLineRunner {
 
 	private static final Logger log = LoggerFactory.getLogger(DatabaseMigrationRunner.class);
@@ -26,7 +27,7 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
 			int updatedToAdmin = jdbcTemplate.update("UPDATE tuser SET role = 'ADMIN' WHERE role = 'Administrador' OR role = 'Super Usuario'");
 			int updatedToBarber = jdbcTemplate.update("UPDATE tuser SET role = 'BARBER' WHERE role = 'Barbero'");
 			log.info("Migración completada. Usuarios actualizados a ADMIN: {}, a BARBER: {}", updatedToAdmin, updatedToBarber);
-		} catch (Exception e) {
+		} catch(Exception e) {
 			log.error("Fallo al ejecutar la migración de base de datos: {}", e.getMessage());
 		}
 	}
@@ -35,7 +36,7 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
 		try {
 			jdbcTemplate.execute("ALTER TABLE tuser ADD COLUMN phone VARCHAR(255) NULL");
 			log.info("Columna 'phone' agregada a tuser.");
-		} catch (Exception _) {
+		} catch(Exception e) {
 			log.info("La columna 'phone' ya existe o no se pudo agregar.");
 		}
 	}

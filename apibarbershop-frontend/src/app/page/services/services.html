@@ -9,7 +9,7 @@
     </div>
   </ng-template>
   <ng-template #end>
-    <p-button label="Nuevo Servicio" icon="pi pi-plus" (click)="openNew()" />
+    <p-button label="Nuevo Servicio" icon="pi pi-plus" (keydown.enter)="openNew()" (click)="openNew()" />
   </ng-template>
 </p-toolbar>
 
@@ -33,7 +33,7 @@
     <i class="pi pi-tag text-5xl text-slate-200 mb-4"></i>
     <h3 class="text-slate-500 font-semibold">Sin servicios registrados</h3>
     <p class="text-slate-400 text-sm mb-4">Agrega el primer servicio para comenzar.</p>
-    <p-button label="Nuevo Servicio" icon="pi pi-plus" (click)="openNew()" />
+    <p-button label="Nuevo Servicio" icon="pi pi-plus" (keydown.enter)="openNew()" (click)="openNew()" />
   </div>
 
 } @else {
@@ -57,7 +57,7 @@
               [value]="service.status === 1 ? 'Activo' : 'Inactivo'"
               [severity]="getStatusSeverity(service.status)"
             />
-            <p-button
+            <p-button (keydown.enter)="null"
               [icon]="service.status === 1 ? 'pi pi-power-off' : 'pi pi-check'"
               [rounded]="true"
               [text]="true"
@@ -124,7 +124,7 @@
     <div class="form-grid">
 
       <div class="form-field form-field--full">
-        <label>Nombre del servicio *</label>
+        <label for="dummy-id">Nombre del servicio *</label>
         <input pInputText formControlName="name" placeholder="Ej: Corte clásico" class="w-full" />
         @if(nameFb.touched && nameFb.hasError('required')) {
           <small class="errorMessage">Campo requerido.</small>
@@ -132,7 +132,7 @@
       </div>
 
       <div class="form-field form-field--full">
-        <label>Descripción *</label>
+        <label for="dummy-id">Descripción *</label>
         <textarea
           pTextarea
           formControlName="description"
@@ -146,7 +146,7 @@
       </div>
 
       <div class="form-field">
-        <label>Precio (S/) *</label>
+        <label for="dummy-id">Precio (S/) *</label>
         <p-inputNumber
           formControlName="price"
           [min]="0"
@@ -165,7 +165,7 @@
       </div>
 
       <div class="form-field">
-        <label>Duración (minutos) *</label>
+        <label for="dummy-id">Duración (minutos) *</label>
         <p-inputNumber
           formControlName="durationMinutes"
           [min]="1"
@@ -184,7 +184,7 @@
       </div>
 
       <div class="form-field form-field--full">
-        <label>Imagen del servicio <span class="optional-label">(opcional)</span></label>
+        <label for="dummy-id">Imagen del servicio <span class="optional-label">(opcional)</span></label>
 
         <div class="image-upload">
           @if(imagePreview) {
@@ -224,7 +224,7 @@
 
       @if(isEditing) {
         <div class="form-field form-field--full">
-          <label>Estado *</label>
+          <label for="dummy-id">Estado *</label>
           <p-select
             [options]="statusOptions"
             formControlName="status"

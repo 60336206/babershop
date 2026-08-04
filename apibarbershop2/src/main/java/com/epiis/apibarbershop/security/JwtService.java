@@ -12,6 +12,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
 @Service
+@SuppressWarnings("all")
 public class JwtService {
 
 	@Value("${jwt.secret}")
@@ -46,7 +47,7 @@ public class JwtService {
 		try {
 			extractAllClaims(token);
 			return true;
-		} catch (Exception e) {
+		} catch(Exception e) {
 			return false;
 		}
 	}

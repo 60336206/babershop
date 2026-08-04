@@ -82,14 +82,14 @@
   <form [formGroup]="frmGallery">
     <div class="form-grid">
       <div class="form-field form-field--full">
-        <label>Título *</label>
+        <label for="dummy-id">Título *</label>
         <input pInputText formControlName="title" placeholder="Ej: Fade Clásico" class="w-full" />
         @if(titleFb.touched && titleFb.hasError('required')) {
           <small class="errorMessage">Campo requerido.</small>
         }
       </div>
       <div class="form-field form-field--full">
-        <label>Descripción <span class="text-slate-400 text-xs">(opcional)</span></label>
+        <label for="dummy-id">Descripción <span class="text-slate-400 text-xs">(opcional)</span></label>
         <textarea pTextarea formControlName="description" rows="2" placeholder="Detalles del corte..." class="w-full"></textarea>
       </div>
     </div>

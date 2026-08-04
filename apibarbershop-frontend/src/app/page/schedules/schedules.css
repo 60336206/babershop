@@ -65,8 +65,8 @@
   letter-spacing: .04em;
 }
 
-.day-badge--active { background: rgba(52,211,153,.35); color: #d1fae5; }
-.day-badge--off    { background: rgba(255,255,255,.15); color: #e2e8f0; }
+.day-badge--active { background: #000000; color: #ffffff; }
+.day-badge--off    { background: #000000; color: #ffffff; }
 
 .day-card-body {
   flex: 1;

@@ -13,30 +13,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { SelectModule } from 'primeng/select';
 
 import { Api } from '../../api/api';
-import { apicustomergetall, apicustomerinsert, ApicustomerinsertParams } from '../../api/functions';
-
-import { HttpClient, HttpContext, HttpResponse } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
-import { StrictHttpResponse } from '../../api/strict-http-response';
-import { RequestBuilder } from '../../api/request-builder';
-
-function apicustomerupdate(http: HttpClient, rootUrl: string, params: { body: any }, context?: HttpContext): Observable<StrictHttpResponse<any>> {
-  const rb = new RequestBuilder(rootUrl, '/customer/update', 'put');
-  rb.body(params.body, 'application/json');
-  return http.request(rb.build({ responseType: 'json', accept: 'application/json', context })).pipe(
-    filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
-    map((r: HttpResponse<any>) => r as StrictHttpResponse<any>)
-  );
-}
-
-function apicustomerdelete(http: HttpClient, rootUrl: string, params: { idCustomer: string }, context?: HttpContext): Observable<StrictHttpResponse<any>> {
-  const rb = new RequestBuilder(rootUrl, `/customer/delete/${params.idCustomer}`, 'delete');
-  return http.request(rb.build({ responseType: 'json', accept: 'application/json', context })).pipe(
-    filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
-    map((r: HttpResponse<any>) => r as StrictHttpResponse<any>)
-  );
-}
+import { apicustomergetall, apicustomerinsert, ApicustomerinsertParams, apicustomerupdate, apicustomerdelete } from '../../api/functions';
 
 import { noWhitespaceValidator } from '../../shared/validators/no-whitespace.validator';
 

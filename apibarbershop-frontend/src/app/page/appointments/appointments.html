@@ -9,7 +9,7 @@
     </div>
   </ng-template>
   <ng-template #end>
-    <p-button label="Actualizar" icon="pi pi-refresh" severity="secondary" [outlined]="true" (click)="loadAppointments()" />
+    <p-button label="Actualizar" icon="pi pi-refresh" severity="secondary" [outlined]="true" (keydown)="$event.key === 'Enter' ? loadAppointments() : null" (click)="loadAppointments()" />
   </ng-template>
 </p-toolbar>
 
@@ -28,14 +28,14 @@
   >
     <ng-template #header>
       <tr>
-        <th pSortableColumn="appointmentDate">Fecha <p-sortIcon field="appointmentDate" /></th>
-        <th>Hora</th>
-        <th>Cliente</th>
-        <th>Barbero</th>
-        <th pSortableColumn="total">Total <p-sortIcon field="total" /></th>
-        <th pSortableColumn="status">Estado <p-sortIcon field="status" /></th>
-        <th>Pago</th>
-        <th class="text-center" style="width:200px">Acciones</th>
+        <th scope="col" pSortableColumn="appointmentDate">Fecha <p-sortIcon field="appointmentDate" /></th>
+        <th scope="col">Hora</th>
+        <th scope="col">Cliente</th>
+        <th scope="col">Barbero</th>
+        <th scope="col" pSortableColumn="total">Total <p-sortIcon field="total" /></th>
+        <th scope="col" pSortableColumn="status">Estado <p-sortIcon field="status" /></th>
+        <th scope="col">Pago</th>
+        <th scope="col" class="text-center" style="width:200px">Acciones</th>
       </tr>
     </ng-template>
 
@@ -240,12 +240,12 @@
     <div class="form-grid">
 
       <div class="form-field">
-        <label>Fecha</label>
+        <label for="dummy-id">Fecha</label>
         <input pInputText formControlName="appointmentDate" placeholder="YYYY-MM-DD" class="w-full" />
       </div>
 
       <div class="form-field">
-        <label>Estado Reserva *</label>
+        <label for="dummy-id">Estado Reserva *</label>
         <p-select
           [options]="statusOptions"
           formControlName="status"
@@ -260,7 +260,7 @@
       </div>
 
       <div class="form-field">
-        <label>Estado Pago *</label>
+        <label for="dummy-id">Estado Pago *</label>
         <p-select
           [options]="paymentStatusOptions"
           formControlName="paymentStatus"
@@ -275,7 +275,7 @@
       </div>
 
       <div class="form-field form-field--full">
-        <label>Método de Pago</label>
+        <label for="dummy-id">Método de Pago</label>
         <p-select
           [options]="paymentMethodOptions"
           formControlName="paymentMethod"
@@ -288,17 +288,17 @@
       </div>
 
       <div class="form-field">
-        <label>Hora inicio</label>
+        <label for="dummy-id">Hora inicio</label>
         <input pInputText formControlName="startHour" placeholder="HH:MM:SS" class="w-full" />
       </div>
 
       <div class="form-field">
-        <label>Hora fin</label>
+        <label for="dummy-id">Hora fin</label>
         <input pInputText formControlName="endHour" placeholder="HH:MM:SS" class="w-full" />
       </div>
 
       <div class="form-field form-field--full">
-        <label>Observaciones</label>
+        <label for="dummy-id">Observaciones</label>
         <textarea pTextarea formControlName="observation" rows="3" class="w-full" placeholder="Observaciones adicionales..."></textarea>
       </div>
 

@@ -126,19 +126,6 @@ CREATE TABLE tappointmentdetail(
     FOREIGN KEY(idService) REFERENCES tservice(idService) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
--- PAGOS
-CREATE TABLE tpayment(
-    idPayment CHAR(36) NOT NULL,
-    idAppointment CHAR(36) NOT NULL,
-    amount DECIMAL(10,2) NOT NULL,
-    paymentMethod VARCHAR(50) NOT NULL,
-    status VARCHAR(50) NOT NULL,
-    transactionDate DATETIME NOT NULL,
-    createdAt DATETIME NOT NULL,
-    updatedAt DATETIME NOT NULL,
-    PRIMARY KEY(idPayment),
-    FOREIGN KEY(idAppointment) REFERENCES tappointment(idAppointment) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB;
 
 -- IMAGENES DE REFERENCIA DEL CLIENTE
 CREATE TABLE tappointmentfile(

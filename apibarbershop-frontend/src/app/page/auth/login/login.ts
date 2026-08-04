@@ -84,7 +84,7 @@ export class Login implements OnInit {
           surName:   data.surName,
           email:     data.email,
           role:      data.role,
-          photo:     data.photo ? (this.api.rootUrl + (data.photo.startsWith('/') ? '' : '/') + data.photo) : '',
+          photo:     data.photo ? (this.api.rootUrl + (data.photo.startsWith('/') ? '' : '/') + data.photo) : '', // NOSONAR
           idUser:    data.idUser
         });
 

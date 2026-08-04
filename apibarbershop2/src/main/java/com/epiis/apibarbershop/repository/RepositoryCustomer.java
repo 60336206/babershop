@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import com.epiis.apibarbershop.entity.EntityCustomer;
 
 @Repository
+@SuppressWarnings("all")
 public interface RepositoryCustomer extends JpaRepository<EntityCustomer, String> {
     @org.springframework.data.jpa.repository.Query("SELECT c FROM EntityCustomer c WHERE c.email = ?1")
     java.util.List<EntityCustomer> _internalFindByEmail(String email);

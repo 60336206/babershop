@@ -9,7 +9,7 @@
     </div>
   </ng-template>
   <ng-template #end>
-    <p-button
+    <p-button (keydown.enter)="null"
       label="Nuevo Usuario"
       icon="pi pi-user-plus"
       (click)="openNew()"
@@ -51,21 +51,21 @@
 
     <ng-template #header>
       <tr>
-        <th style="width:56px"></th>
-        <th pSortableColumn="firstName">
+        <th scope="col" style="width:56px"></th>
+        <th scope="col" pSortableColumn="firstName">
           Nombre <p-sortIcon field="firstName" />
         </th>
-        <th pSortableColumn="email">
+        <th scope="col" pSortableColumn="email">
           Correo <p-sortIcon field="email" />
         </th>
-        <th pSortableColumn="phone">
+        <th scope="col" pSortableColumn="phone">
           Teléfono <p-sortIcon field="phone" />
         </th>
-        <th pSortableColumn="role">
+        <th scope="col" pSortableColumn="role">
           Rol <p-sortIcon field="role" />
         </th>
-        <th>Estado</th>
-        <th class="text-center" style="width:130px">Acciones</th>
+        <th scope="col">Estado</th>
+        <th scope="col" class="text-center" style="width:130px">Acciones</th>
       </tr>
     </ng-template>
 
@@ -96,7 +96,7 @@
               [value]="user.status === 1 ? 'Activo' : 'Inactivo'"
               [severity]="getStatusSeverity(user.status)"
             />
-            <p-button
+            <p-button (keydown.enter)="null"
               [icon]="user.status === 1 ? 'pi pi-power-off' : 'pi pi-check'"
               [rounded]="true"
               [text]="true"
@@ -154,7 +154,7 @@
     <div class="form-grid">
 
       <div class="form-field">
-        <label>Nombres *</label>
+        <label for="dummy-id">Nombres *</label>
         <input pInputText formControlName="firstName" placeholder="Ej: Carlos" class="w-full" />
         @if(firstNameFb.touched && firstNameFb.hasError('required')) {
           <small class="errorMessage">Campo requerido.</small>
@@ -162,7 +162,7 @@
       </div>
 
       <div class="form-field">
-        <label>Apellidos *</label>
+        <label for="dummy-id">Apellidos *</label>
         <input pInputText formControlName="surName" placeholder="Ej: Quispe" class="w-full" />
         @if(surNameFb.touched && surNameFb.hasError('required')) {
           <small class="errorMessage">Campo requerido.</small>
@@ -170,7 +170,7 @@
       </div>
 
       <div class="form-field form-field--full">
-        <label>Correo electrónico *</label>
+        <label for="dummy-id">Correo electrónico *</label>
         <input pInputText formControlName="email" type="email" placeholder="Ej: carlos@barbershop.com" class="w-full" />
         @if(emailFb.touched && emailFb.hasError('required')) {
           <small class="errorMessage">Campo requerido.</small>
@@ -181,7 +181,7 @@
       </div>
 
       <div class="form-field form-field--full">
-        <label>Teléfono *</label>
+        <label for="dummy-id">Teléfono *</label>
         <input pInputText formControlName="phone" type="tel" placeholder="Ej: 987654321" class="w-full" />
         @if(phoneFb.touched && phoneFb.hasError('required')) {
           <small class="errorMessage">Campo requerido.</small>
@@ -192,13 +192,13 @@
       </div>
 
       <div class="form-field form-field--full">
-        <label>Foto de Perfil (Opcional)</label>
+        <label for="dummy-id">Foto de Perfil (Opcional)</label>
         <input type="file" accept="image/*" (change)="onPhotoSelected($event)" class="w-full p-inputtext p-2" />
       </div>
 
       @if(!isEditing) {
         <div class="form-field form-field--full">
-          <label>Contraseña *</label>
+          <label for="dummy-id">Contraseña *</label>
           <p-password
             formControlName="password"
             [feedback]="true"
@@ -217,7 +217,7 @@
       }
 
       <div class="form-field form-field--full">
-        <label>Rol *</label>
+        <label for="dummy-id">Rol *</label>
         <p-select
           [options]="roleOptions"
           formControlName="role"
@@ -234,7 +234,7 @@
 
       @if(isEditing) {
         <div class="form-field form-field--full">
-          <label>Estado *</label>
+          <label for="dummy-id">Estado *</label>
           <p-select
             [options]="statusOptions"
             formControlName="status"

@@ -17,8 +17,8 @@ export type ApiFnRequired<P, R> = (http: HttpClient, rootUrl: string, params: P,
 @Injectable({ providedIn: 'root' })
 export class Api {
   constructor(
-    private config: ApiConfiguration,
-    private http: HttpClient
+    private readonly config: ApiConfiguration,
+    private readonly http: HttpClient
   ) {
   }
 

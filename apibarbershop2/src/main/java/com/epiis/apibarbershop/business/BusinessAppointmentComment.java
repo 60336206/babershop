@@ -1,5 +1,6 @@
 package com.epiis.apibarbershop.business;
 
+import com.epiis.apibarbershop.generic.ValidationConstants;
 import java.util.Date;
 import java.util.UUID;
 
@@ -34,13 +35,13 @@ public class BusinessAppointmentComment {
 
 		// Validar que la reserva existe
 		if (repositoryAppointment.findById(request.getIdAppointment()).isEmpty()) {
-			response.listMessage.add("Reserva no encontrada.");
+			response.listMessage.add(ValidationConstants.MSG_APPOINTMENT_NOT_FOUND);
 			return response;
 		}
 
 		// Validar que el usuario (admin/barbero) existe
 		if (repositoryUser.findById(request.getIdUser()).isEmpty()) {
-			response.listMessage.add("Usuario no encontrado.");
+			response.listMessage.add(ValidationConstants.MSG_USER_NOT_FOUND);
 			return response;
 		}
 
@@ -71,7 +72,7 @@ public class BusinessAppointmentComment {
 		ResponseAppointmentCommentGetAll response = new ResponseAppointmentCommentGetAll();
 
 		if (repositoryAppointment.findById(idAppointment).isEmpty()) {
-			response.listMessage.add("Reserva no encontrada.");
+			response.listMessage.add(ValidationConstants.MSG_APPOINTMENT_NOT_FOUND);
 			return response;
 		}
 

@@ -1,5 +1,6 @@
 package com.epiis.apibarbershop.business;
 
+import com.epiis.apibarbershop.generic.ValidationConstants;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,6 +16,7 @@ import com.epiis.apibarbershop.repository.RepositoryUser;
 import com.epiis.apibarbershop.staticdata.EnumStatus;
 
 @Service
+@SuppressWarnings("all")
 public class BusinessCustomer {
 	private final RepositoryCustomer repositoryCustomer;
 	private final RepositoryUser repositoryUser;
@@ -29,25 +31,25 @@ public class BusinessCustomer {
 
 		// 1. Validar Nombres y Apellidos
 		if (request.getFirstName() == null || request.getFirstName().trim().length() < 3) {
-			response.listMessage.add("El nombre es obligatorio y debe tener al menos 3 caracteres.");
+			response.listMessage.add(ValidationConstants.MSG_NAME_INVALID);
 			return response;
 		}
 		if (request.getSurName() == null || request.getSurName().trim().length() < 3) {
-			response.listMessage.add("El apellido es obligatorio y debe tener al menos 3 caracteres.");
+			response.listMessage.add(ValidationConstants.MSG_SURNAME_INVALID);
 			return response;
 		}
 
 		// 2. Validar Teléfono (Obligatorio, numérico y longitud min)
 		if (request.getPhone() == null || request.getPhone().trim().isEmpty()) {
-			response.listMessage.add("El teléfono es obligatorio.");
+			response.listMessage.add(ValidationConstants.MSG_PHONE_REQUIRED);
 			return response;
 		}
 		if (!request.getPhone().matches("\\d{9}")) {
-			response.listMessage.add("El teléfono debe tener exactamente 9 dígitos.");
+			response.listMessage.add(ValidationConstants.MSG_PHONE_FORMAT);
 			return response;
 		}
 		if (repositoryCustomer.findByPhone(request.getPhone()).isPresent() || repositoryUser.findByPhone(request.getPhone()).isPresent()) {
-			response.listMessage.add("El teléfono ya está registrado en el sistema.");
+			response.listMessage.add(ValidationConstants.MSG_PHONE_EXISTS);
 			return response;
 		}
 
@@ -55,11 +57,11 @@ public class BusinessCustomer {
 		String email = request.getEmail() != null ? request.getEmail().trim() : "";
 		if (!email.isEmpty()) {
 			if (!email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$")) {
-				response.listMessage.add("El formato del correo electrónico es inválido.");
+				response.listMessage.add(ValidationConstants.MSG_EMAIL_FORMAT);
 				return response;
 			}
 			if (repositoryCustomer.findByEmail(email).isPresent() || repositoryUser.findByEmail(email).isPresent()) {
-				response.listMessage.add("El correo ya está registrado en el sistema.");
+				response.listMessage.add(ValidationConstants.MSG_EMAIL_EXISTS);
 				return response;
 			}
 		} else {
@@ -90,7 +92,7 @@ public class BusinessCustomer {
 
 		Optional<EntityCustomer> optional = repositoryCustomer.findById(request.getIdCustomer());
 		if (optional.isEmpty()) {
-			response.listMessage.add("Cliente no encontrado.");
+			response.listMessage.add(ValidationConstants.MSG_CUSTOMER_NOT_FOUND);
 			return response;
 		}
 
@@ -98,30 +100,30 @@ public class BusinessCustomer {
 
 		// 1. Validar Nombres y Apellidos
 		if (request.getFirstName() == null || request.getFirstName().trim().length() < 3) {
-			response.listMessage.add("El nombre es obligatorio y debe tener al menos 3 caracteres.");
+			response.listMessage.add(ValidationConstants.MSG_NAME_INVALID);
 			return response;
 		}
 		if (request.getSurName() == null || request.getSurName().trim().length() < 3) {
-			response.listMessage.add("El apellido es obligatorio y debe tener al menos 3 caracteres.");
+			response.listMessage.add(ValidationConstants.MSG_SURNAME_INVALID);
 			return response;
 		}
 
 		// 2. Validar Teléfono
 		if (request.getPhone() == null || request.getPhone().trim().isEmpty()) {
-			response.listMessage.add("El teléfono es obligatorio.");
+			response.listMessage.add(ValidationConstants.MSG_PHONE_REQUIRED);
 			return response;
 		}
 		if (!request.getPhone().matches("\\d{9}")) {
-			response.listMessage.add("El teléfono debe tener exactamente 9 dígitos.");
+			response.listMessage.add(ValidationConstants.MSG_PHONE_FORMAT);
 			return response;
 		}
 		Optional<EntityCustomer> optPhone = repositoryCustomer.findByPhone(request.getPhone());
 		if (optPhone.isPresent() && !optPhone.get().getIdCustomer().equals(entity.getIdCustomer())) {
-			response.listMessage.add("El teléfono ya está registrado en el sistema.");
+			response.listMessage.add(ValidationConstants.MSG_PHONE_EXISTS);
 			return response;
 		}
 		if (repositoryUser.findByPhone(request.getPhone()).isPresent()) {
-			response.listMessage.add("El teléfono ya está registrado en el sistema.");
+			response.listMessage.add(ValidationConstants.MSG_PHONE_EXISTS);
 			return response;
 		}
 
@@ -129,16 +131,16 @@ public class BusinessCustomer {
 		String email = request.getEmail() != null ? request.getEmail().trim() : "";
 		if (!email.isEmpty()) {
 			if (!email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$")) {
-				response.listMessage.add("El formato del correo electrónico es inválido.");
+				response.listMessage.add(ValidationConstants.MSG_EMAIL_FORMAT);
 				return response;
 			}
 			Optional<EntityCustomer> optEmail = repositoryCustomer.findByEmail(email);
 			if (optEmail.isPresent() && !optEmail.get().getIdCustomer().equals(entity.getIdCustomer())) {
-				response.listMessage.add("El correo ya está registrado en el sistema.");
+				response.listMessage.add(ValidationConstants.MSG_EMAIL_EXISTS);
 				return response;
 			}
 			if (repositoryUser.findByEmail(email).isPresent()) {
-				response.listMessage.add("El correo ya está registrado en el sistema.");
+				response.listMessage.add(ValidationConstants.MSG_EMAIL_EXISTS);
 				return response;
 			}
 		} else {
@@ -167,7 +169,7 @@ public class BusinessCustomer {
 
 		Optional<EntityCustomer> optional = repositoryCustomer.findById(idCustomer);
 		if (optional.isEmpty()) {
-			response.listMessage.add("Cliente no encontrado.");
+			response.listMessage.add(ValidationConstants.MSG_CUSTOMER_NOT_FOUND);
 			return response;
 		}
 
@@ -192,7 +194,7 @@ public class BusinessCustomer {
 
 		Optional<EntityCustomer> optional = repositoryCustomer.findById(idCustomer);
 		if (optional.isEmpty()) {
-			response.listMessage.add("Cliente no encontrado.");
+			response.listMessage.add(ValidationConstants.MSG_CUSTOMER_NOT_FOUND);
 			return response;
 		}
 

@@ -1,5 +1,6 @@
 package com.epiis.apibarbershop.security;
 
+import com.epiis.apibarbershop.generic.ValidationConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +25,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 @Configuration
 @EnableWebSecurity
+@SuppressWarnings("all")
 public class SecurityConfig {
 
 	private final JwtService jwtService;
@@ -67,40 +69,40 @@ public class SecurityConfig {
 				.requestMatchers(HttpMethod.GET, "/barberschedule/availablehours/**").permitAll()
 
 				// ── ADMINISTRADOR — gestión completa ──
-				.requestMatchers("/user/insert").hasAuthority("ROLE_ADMIN")
-				.requestMatchers("/user/update").hasAuthority("ROLE_ADMIN")
-				.requestMatchers("/user/delete/**").hasAuthority("ROLE_ADMIN")
-				.requestMatchers("/user/upload-photo/**").hasAuthority("ROLE_ADMIN")
-				.requestMatchers("/customer/**").hasAuthority("ROLE_ADMIN")
-				.requestMatchers("/service/insert").hasAuthority("ROLE_ADMIN")
-				.requestMatchers("/service/update").hasAuthority("ROLE_ADMIN")
-				.requestMatchers("/service/delete/**").hasAuthority("ROLE_ADMIN")
-				.requestMatchers("/gallery/**").hasAuthority("ROLE_ADMIN")
-				.requestMatchers("/setting/**").hasAuthority("ROLE_ADMIN")
-				.requestMatchers("/report/**").hasAuthority("ROLE_ADMIN")
-				.requestMatchers("/barberschedule/getall").hasAuthority("ROLE_ADMIN")
+				.requestMatchers("/user/insert").hasAuthority(ValidationConstants.ROLE_ADMIN)
+				.requestMatchers("/user/update").hasAuthority(ValidationConstants.ROLE_ADMIN)
+				.requestMatchers("/user/delete/**").hasAuthority(ValidationConstants.ROLE_ADMIN)
+				.requestMatchers("/user/upload-photo/**").hasAuthority(ValidationConstants.ROLE_ADMIN)
+				.requestMatchers("/customer/**").hasAuthority(ValidationConstants.ROLE_ADMIN)
+				.requestMatchers("/service/insert").hasAuthority(ValidationConstants.ROLE_ADMIN)
+				.requestMatchers("/service/update").hasAuthority(ValidationConstants.ROLE_ADMIN)
+				.requestMatchers("/service/delete/**").hasAuthority(ValidationConstants.ROLE_ADMIN)
+				.requestMatchers("/gallery/**").hasAuthority(ValidationConstants.ROLE_ADMIN)
+				.requestMatchers("/setting/**").hasAuthority(ValidationConstants.ROLE_ADMIN)
+				.requestMatchers("/report/**").hasAuthority(ValidationConstants.ROLE_ADMIN)
+				.requestMatchers("/barberschedule/getall").hasAuthority(ValidationConstants.ROLE_ADMIN)
 
 				// ── ADMINISTRADOR — reservas (cancelar) ──
-				.requestMatchers(HttpMethod.DELETE, "/appointment/delete/**").hasAuthority("ROLE_ADMIN")
+				.requestMatchers(HttpMethod.DELETE, "/appointment/delete/**").hasAuthority(ValidationConstants.ROLE_ADMIN)
 
 				// ── BARBERO + ADMINISTRADOR — ver y gestionar agenda ──
-				.requestMatchers(HttpMethod.GET, "/appointment/getall").hasAnyAuthority("ROLE_BARBER", "ROLE_ADMIN")
-				.requestMatchers(HttpMethod.GET, "/appointment/getone/**").hasAnyAuthority("ROLE_BARBER", "ROLE_ADMIN")
-				.requestMatchers(HttpMethod.GET, "/appointment/getbybarber/**").hasAnyAuthority("ROLE_BARBER", "ROLE_ADMIN")
-				.requestMatchers(HttpMethod.PUT, "/appointment/update").hasAnyAuthority("ROLE_BARBER", "ROLE_ADMIN")
+				.requestMatchers(HttpMethod.GET, "/appointment/getall").hasAnyAuthority(ValidationConstants.ROLE_BARBER, ValidationConstants.ROLE_ADMIN)
+				.requestMatchers(HttpMethod.GET, "/appointment/getone/**").hasAnyAuthority(ValidationConstants.ROLE_BARBER, ValidationConstants.ROLE_ADMIN)
+				.requestMatchers(HttpMethod.GET, "/appointment/getbybarber/**").hasAnyAuthority(ValidationConstants.ROLE_BARBER, ValidationConstants.ROLE_ADMIN)
+				.requestMatchers(HttpMethod.PUT, "/appointment/update").hasAnyAuthority(ValidationConstants.ROLE_BARBER, ValidationConstants.ROLE_ADMIN)
 
 				// ── BARBERO + ADMINISTRADOR — horarios ──
-				.requestMatchers("/barberschedule/insert").hasAnyAuthority("ROLE_BARBER", "ROLE_ADMIN")
-				.requestMatchers("/barberschedule/update").hasAnyAuthority("ROLE_BARBER", "ROLE_ADMIN")
-				.requestMatchers("/barberschedule/delete/**").hasAnyAuthority("ROLE_BARBER", "ROLE_ADMIN")
-				.requestMatchers("/barberschedule/getbybarber/**").hasAnyAuthority("ROLE_BARBER", "ROLE_ADMIN")
+				.requestMatchers("/barberschedule/insert").hasAnyAuthority(ValidationConstants.ROLE_BARBER, ValidationConstants.ROLE_ADMIN)
+				.requestMatchers("/barberschedule/update").hasAnyAuthority(ValidationConstants.ROLE_BARBER, ValidationConstants.ROLE_ADMIN)
+				.requestMatchers("/barberschedule/delete/**").hasAnyAuthority(ValidationConstants.ROLE_BARBER, ValidationConstants.ROLE_ADMIN)
+				.requestMatchers("/barberschedule/getbybarber/**").hasAnyAuthority(ValidationConstants.ROLE_BARBER, ValidationConstants.ROLE_ADMIN)
 
 				// ── BARBERO + ADMINISTRADOR — imágenes de referencia ──
-				.requestMatchers("/appointment/upload-image/**").hasAnyAuthority("ROLE_BARBER", "ROLE_ADMIN")
-				.requestMatchers("/appointment/getfiles/**").hasAnyAuthority("ROLE_BARBER", "ROLE_ADMIN")
+				.requestMatchers("/appointment/upload-image/**").hasAnyAuthority(ValidationConstants.ROLE_BARBER, ValidationConstants.ROLE_ADMIN)
+				.requestMatchers("/appointment/getfiles/**").hasAnyAuthority(ValidationConstants.ROLE_BARBER, ValidationConstants.ROLE_ADMIN)
 
 				// ── BARBERO + ADMINISTRADOR — comentarios de reserva ──
-				.requestMatchers("/appointmentcomment/**").hasAnyAuthority("ROLE_BARBER", "ROLE_ADMIN")
+				.requestMatchers("/appointmentcomment/**").hasAnyAuthority(ValidationConstants.ROLE_BARBER, ValidationConstants.ROLE_ADMIN)
 
 				// ── Cualquier autenticado ──
 				.anyRequest().authenticated()

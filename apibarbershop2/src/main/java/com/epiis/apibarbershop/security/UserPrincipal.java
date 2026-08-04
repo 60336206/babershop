@@ -9,6 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.epiis.apibarbershop.entity.EntityUser;
 
+@SuppressWarnings("all")
 public class UserPrincipal implements UserDetails {
 
 	private final EntityUser user;

@@ -1,5 +1,6 @@
 package com.epiis.apibarbershop.business;
 
+import com.epiis.apibarbershop.generic.ValidationConstants;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -39,7 +40,7 @@ public class BusinessAppointmentFile {
 
 		// Validar que la reserva existe
 		if (repositoryAppointment.findById(idAppointment).isEmpty()) {
-			response.listMessage.add("Reserva no encontrada.");
+			response.listMessage.add(ValidationConstants.MSG_APPOINTMENT_NOT_FOUND);
 			return response;
 		}
 
@@ -106,7 +107,7 @@ public class BusinessAppointmentFile {
 		ResponseAppointmentFileGetAll response = new ResponseAppointmentFileGetAll();
 
 		if (repositoryAppointment.findById(idAppointment).isEmpty()) {
-			response.listMessage.add("Reserva no encontrada.");
+			response.listMessage.add(ValidationConstants.MSG_APPOINTMENT_NOT_FOUND);
 			return response;
 		}
 

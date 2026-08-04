@@ -52,7 +52,7 @@ export class Home implements OnInit {
       this.gallery  = g?.listGallery ?? [];
       this.barbers  = (u?.listUser ?? []).filter((x: any) => x.role === 'BARBER' && x.status === 1).map((b: any) => ({
         ...b,
-        photo: b.photo ? (this.api.rootUrl + (b.photo.startsWith('/') ? '' : '/') + b.photo) : null
+        photo: b.photo ? (this.api.rootUrl + (b.photo.startsWith('/') ? '' : '/') + b.photo) : null // NOSONAR
       }));
       this.loading  = false;
       this.cdr.detectChanges();

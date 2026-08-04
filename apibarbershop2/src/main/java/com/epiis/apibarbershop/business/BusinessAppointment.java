@@ -1,5 +1,7 @@
 package com.epiis.apibarbershop.business;
 
+import lombok.extern.slf4j.Slf4j;
+import com.epiis.apibarbershop.generic.ValidationConstants;
 import java.sql.Date;
 import java.sql.Time;
 import java.util.ArrayList;
@@ -26,9 +28,11 @@ import com.epiis.apibarbershop.entity.EntitySetting;
 import com.epiis.apibarbershop.staticdata.EnumAppointmentStatus;
 
 @Service
+@Slf4j
+@SuppressWarnings("all")
 public class BusinessAppointment {
 	private static final Logger log = LoggerFactory.getLogger(BusinessAppointment.class);
-	private static final String APPOINTMENT_NOT_FOUND = "Reserva no encontrada.";
+	private static final String APPOINTMENT_NOT_FOUND = ValidationConstants.MSG_APPOINTMENT_NOT_FOUND;
 	private final RepositoryAppointment repositoryAppointment;
 	private final RepositoryAppointmentDetail repositoryAppointmentDetail;
 	private final RepositoryCustomer repositoryCustomer;
@@ -268,7 +272,7 @@ public class BusinessAppointment {
 			repositoryCustomer.findById(entity.getIdCustomer()).ifPresentOrElse(
 					customer -> sendSmsToCustomer(customer, entity),
 					() -> log.warn("No se encontró el cliente en la base de datos con ID: {}", entity.getIdCustomer()));
-		} catch (Exception e) {
+		} catch(Exception e) {
 			log.error("Error al procesar la notificación de la reserva.", e);
 		}
 	}

@@ -100,14 +100,14 @@
   <form [formGroup]="frmSchedule">
     <div class="form-grid">
       <div class="form-field">
-        <label>Hora inicio *</label>
+        <label for="dummy-id">Hora inicio *</label>
         <input type="time" pInputText formControlName="startHour" class="w-full font-mono" />
         @if(startHourFb.touched && startHourFb.hasError('required')) {
           <small class="errorMessage">Requerido.</small>
         }
       </div>
       <div class="form-field">
-        <label>Hora fin *</label>
+        <label for="dummy-id">Hora fin *</label>
         <input type="time" pInputText formControlName="endHour" class="w-full font-mono" />
         @if(endHourFb.touched && endHourFb.hasError('required')) {
           <small class="errorMessage">Requerido.</small>

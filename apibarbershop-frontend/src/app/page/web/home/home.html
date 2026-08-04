@@ -11,8 +11,8 @@
       <a href="#contacto">Contacto</a>
     </nav>
     <div class="navbar-actions">
-      <p-button label="Reservar Cita" icon="pi pi-calendar-plus" (click)="goToBooking()" />
-      <p-button label="Admin" icon="pi pi-lock" [text]="true" severity="secondary" (click)="goToAdmin()" />
+      <p-button label="Reservar Cita" icon="pi pi-calendar-plus" (keydown.enter)="goToBooking()" (click)="goToBooking()" />
+      <p-button label="Admin" icon="pi pi-lock" [text]="true" severity="secondary" (keydown.enter)="goToAdmin()" (click)="goToAdmin()" />
     </div>
   </div>
 </header>
@@ -32,7 +32,7 @@
     <h1 class="hero-title">{{ setting?.businessName ?? 'BarberShop' }}</h1>
     <p class="hero-sub">Tu estilo, nuestra pasión. Reserva tu cita en minutos.</p>
     <div class="hero-btns">
-      <p-button label="Reservar mi cita" icon="pi pi-calendar-plus" size="large" (click)="goToBooking()" />
+      <p-button label="Reservar mi cita" icon="pi pi-calendar-plus" size="large" (keydown.enter)="goToBooking()" (click)="goToBooking()" />
       <a href="#servicios" class="hero-link">
         <i class="pi pi-arrow-down"></i> Ver servicios
       </a>
@@ -167,7 +167,7 @@
   <div class="cta-inner">
     <h2 class="cta-title">¿Listo para verte increíble?</h2>
     <p class="cta-sub">Reserva tu cita ahora y garantiza tu lugar con tu barbero favorito.</p>
-    <p-button label="Reservar mi cita ahora" icon="pi pi-calendar-plus" size="large" (click)="goToBooking()" />
+    <p-button label="Reservar mi cita ahora" icon="pi pi-calendar-plus" size="large" (keydown.enter)="goToBooking()" (click)="goToBooking()" />
   </div>
 </section>
 

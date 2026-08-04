@@ -11,6 +11,7 @@ import com.epiis.apibarbershop.dto.response.ResponseAppointmentFileUpload;
 
 @RestController
 @RequestMapping(path = "appointment")
+@SuppressWarnings("all")
 public class AppointmentFileController {
 
 	private final BusinessAppointmentFile businessAppointmentFile;

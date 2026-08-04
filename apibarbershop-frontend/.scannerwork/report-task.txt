@@ -2,5 +2,5 @@ projectKey=barbershop-frontend
 serverUrl=http://localhost:9000
 serverVersion=26.4.0.121862
 dashboardUrl=http://localhost:9000/dashboard?id=barbershop-frontend
-ceTaskId=7e7f3d7d-4b1e-4760-9d7d-af7ddab4f470
-ceTaskUrl=http://localhost:9000/api/ce/task?id=7e7f3d7d-4b1e-4760-9d7d-af7ddab4f470
+ceTaskId=00f089da-a1d0-4ec1-aba5-431da9d79aa2
+ceTaskUrl=http://localhost:9000/api/ce/task?id=00f089da-a1d0-4ec1-aba5-431da9d79aa2
