@@ -115,4 +115,101 @@ class BusinessServiceTest {
         ResponseServiceGetOne res = target.getone("service-id");
         assertEquals("success", res.getType());
     }
+
+    @Test
+    void testInsert_PriceInvalid() {
+        RequestServiceInsert req = new RequestServiceInsert();
+        req.setName("Corte");
+        req.setPrice(new java.math.BigDecimal("0"));
+        req.setDurationMinutes(30);
+
+        ResponseServiceInsert res = target.insert(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testInsert_PriceTooHigh() {
+        RequestServiceInsert req = new RequestServiceInsert();
+        req.setName("Corte");
+        req.setPrice(new java.math.BigDecimal("1001"));
+        req.setDurationMinutes(30);
+
+        ResponseServiceInsert res = target.insert(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testInsert_DurationInvalid() {
+        RequestServiceInsert req = new RequestServiceInsert();
+        req.setName("Corte");
+        req.setPrice(new java.math.BigDecimal("10"));
+        req.setDurationMinutes(0);
+
+        ResponseServiceInsert res = target.insert(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testInsert_DurationTooLong() {
+        RequestServiceInsert req = new RequestServiceInsert();
+        req.setName("Corte");
+        req.setPrice(new java.math.BigDecimal("10"));
+        req.setDurationMinutes(301);
+
+        ResponseServiceInsert res = target.insert(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testInsert_DuplicateName() {
+        EntityService existing = new EntityService();
+        existing.setIdService("other-id");
+        existing.setName("Corte");
+        when(repositoryService.findByName(anyString())).thenReturn(Optional.of(existing));
+
+        RequestServiceInsert req = new RequestServiceInsert();
+        req.setName("Corte");
+        req.setPrice(new java.math.BigDecimal("10"));
+        req.setDurationMinutes(30);
+
+        ResponseServiceInsert res = target.insert(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testUpdate_DuplicateName() {
+        EntityService existing = new EntityService();
+        existing.setIdService("other-id");
+        existing.setName("Corte");
+        when(repositoryService.findByName(anyString())).thenReturn(Optional.of(existing));
+
+        RequestServiceUpdate req = new RequestServiceUpdate();
+        req.setIdService("service-id");
+        req.setName("Corte");
+        req.setPrice(new java.math.BigDecimal("15"));
+        req.setDurationMinutes(40);
+
+        ResponseServiceUpdate res = target.update(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testUpdate_Status() {
+        RequestServiceUpdate req = new RequestServiceUpdate();
+        req.setIdService("service-id");
+        req.setName("Corte 2");
+        req.setPrice(new java.math.BigDecimal("15"));
+        req.setDurationMinutes(40);
+        req.setStatus(1);
+
+        ResponseServiceUpdate res = target.update(req);
+        assertEquals("success", res.getType());
+    }
+
+    @Test
+    void testGetOne_NotFound() {
+        when(repositoryService.findById(anyString())).thenReturn(Optional.empty());
+        ResponseServiceGetOne res = target.getone("service-id");
+        assertEquals("error", res.getType());
+    }
 }

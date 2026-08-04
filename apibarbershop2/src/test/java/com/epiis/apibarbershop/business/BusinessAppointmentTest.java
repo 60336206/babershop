@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -57,6 +58,8 @@ class BusinessAppointmentTest {
     void setUp() {
         EntityAppointment appointment = new EntityAppointment();
         appointment.setIdAppointment("app-id");
+        appointment.setIdCustomer("customer-id");
+        appointment.setIdUser("user-id");
         appointment.setAppointmentDate(Date.valueOf("2026-09-01"));
         appointment.setStartHour(Time.valueOf("10:00:00"));
         appointment.setEndHour(Time.valueOf("11:00:00"));
@@ -135,6 +138,285 @@ class BusinessAppointmentTest {
     @Test
     void testGetOne() {
         ResponseAppointmentGetOne res = target.getone("app-id");
+        assertEquals("success", res.getType());
+    }
+
+    @Test
+    void testUpdate_NotificationException() {
+        when(repositoryCustomer.findById(anyString())).thenThrow(new RuntimeException("boom"));
+
+        RequestAppointmentUpdate req = new RequestAppointmentUpdate();
+        req.setIdAppointment("app-id");
+        req.setStatus("Confirmada");
+        ResponseAppointmentUpdate res = target.update(req);
+        assertEquals("success", res.getType());
+    }
+
+    @Test
+    void testInsert_TooFarFuture() {
+        RequestAppointmentInsert req = new RequestAppointmentInsert();
+        req.setAppointmentDate("2030-01-01");
+        req.setStartHour("10:00");
+        req.setEndHour("11:00");
+
+        ResponseAppointmentInsert res = target.insert(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testInsert_SameDayPastHour() {
+        RequestAppointmentInsert req = new RequestAppointmentInsert();
+        req.setAppointmentDate(LocalDate.now().toString());
+        req.setStartHour("00:00");
+        req.setEndHour("01:00");
+
+        ResponseAppointmentInsert res = target.insert(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testInsert_OutsideBusinessHours() {
+        RequestAppointmentInsert req = new RequestAppointmentInsert();
+        req.setAppointmentDate("2026-09-02");
+        req.setStartHour("07:00");
+        req.setEndHour("08:00");
+
+        ResponseAppointmentInsert res = target.insert(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testInsert_BusinessHoursSettingsEmpty() {
+        when(repositorySetting.findAll()).thenReturn(List.of());
+
+        RequestAppointmentInsert req = new RequestAppointmentInsert();
+        req.setAppointmentDate("2026-09-02");
+        req.setStartHour("10:00");
+        req.setEndHour("11:00");
+
+        ResponseAppointmentInsert res = target.insert(req);
+        assertEquals("success", res.getType());
+    }
+
+    @Test
+    void testInsert_Overlap() {
+        EntityAppointment existing = new EntityAppointment();
+        existing.setIdAppointment("other-app");
+        existing.setStartHour(Time.valueOf("10:00:00"));
+        existing.setEndHour(Time.valueOf("11:00:00"));
+        when(repositoryAppointment.findByIdUserAndAppointmentDate(anyString(), any()))
+                .thenReturn(List.of(existing));
+
+        RequestAppointmentInsert req = new RequestAppointmentInsert();
+        req.setIdUser("user-id");
+        req.setAppointmentDate("2026-09-02");
+        req.setStartHour("10:30");
+        req.setEndHour("11:30");
+
+        ResponseAppointmentInsert res = target.insert(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testInsert_NoOverlap() {
+        EntityAppointment existing = new EntityAppointment();
+        existing.setIdAppointment("other-app");
+        existing.setStartHour(Time.valueOf("12:00:00"));
+        existing.setEndHour(Time.valueOf("13:00:00"));
+        when(repositoryAppointment.findByIdUserAndAppointmentDate(anyString(), any()))
+                .thenReturn(List.of(existing));
+
+        RequestAppointmentInsert req = new RequestAppointmentInsert();
+        req.setIdUser("user-id");
+        req.setAppointmentDate("2026-09-02");
+        req.setStartHour("10:00");
+        req.setEndHour("11:00");
+
+        ResponseAppointmentInsert res = target.insert(req);
+        assertEquals("success", res.getType());
+    }
+
+    @Test
+    void testUpdate_StatusOnly() {
+        RequestAppointmentUpdate req = new RequestAppointmentUpdate();
+        req.setIdAppointment("app-id");
+        req.setStatus("Pendiente");
+        req.setPaymentStatus("Pagado");
+        req.setPaymentMethod("Yape");
+
+        ResponseAppointmentUpdate res = target.update(req);
+        assertEquals("success", res.getType());
+    }
+
+    @Test
+    void testUpdate_InvalidDateFormat() {
+        RequestAppointmentUpdate req = new RequestAppointmentUpdate();
+        req.setIdAppointment("app-id");
+        req.setAppointmentDate("2026/09/02");
+
+        ResponseAppointmentUpdate res = target.update(req);
+        assertEquals("success", res.getType());
+    }
+
+    @Test
+    void testUpdate_MoveToPast() {
+        RequestAppointmentUpdate req = new RequestAppointmentUpdate();
+        req.setIdAppointment("app-id");
+        req.setAppointmentDate("2000-01-01");
+        req.setStartHour("10:00");
+        req.setEndHour("11:00");
+
+        ResponseAppointmentUpdate res = target.update(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testUpdate_TooFarFuture() {
+        RequestAppointmentUpdate req = new RequestAppointmentUpdate();
+        req.setIdAppointment("app-id");
+        req.setAppointmentDate("2030-01-01");
+        req.setStartHour("10:00");
+        req.setEndHour("11:00");
+
+        ResponseAppointmentUpdate res = target.update(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testUpdate_SameDayPastHour() {
+        RequestAppointmentUpdate req = new RequestAppointmentUpdate();
+        req.setIdAppointment("app-id");
+        req.setAppointmentDate(LocalDate.now().toString());
+        req.setStartHour("00:00");
+        req.setEndHour("01:00");
+
+        ResponseAppointmentUpdate res = target.update(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testUpdate_OutsideBusinessHours() {
+        RequestAppointmentUpdate req = new RequestAppointmentUpdate();
+        req.setIdAppointment("app-id");
+        req.setAppointmentDate("2026-09-02");
+        req.setStartHour("07:00");
+        req.setEndHour("08:00");
+
+        ResponseAppointmentUpdate res = target.update(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testUpdate_SettingsEmpty() {
+        when(repositorySetting.findAll()).thenReturn(List.of());
+
+        RequestAppointmentUpdate req = new RequestAppointmentUpdate();
+        req.setIdAppointment("app-id");
+        req.setAppointmentDate("2026-09-02");
+        req.setStartHour("10:00");
+        req.setEndHour("11:00");
+
+        ResponseAppointmentUpdate res = target.update(req);
+        assertEquals("success", res.getType());
+    }
+
+    @Test
+    void testUpdate_Overlap() {
+        EntityAppointment existing = new EntityAppointment();
+        existing.setIdAppointment("other-app");
+        existing.setStartHour(Time.valueOf("10:00:00"));
+        existing.setEndHour(Time.valueOf("11:00:00"));
+        when(repositoryAppointment.findByIdUserAndAppointmentDate(anyString(), any()))
+                .thenReturn(List.of(existing));
+
+        RequestAppointmentUpdate req = new RequestAppointmentUpdate();
+        req.setIdAppointment("app-id");
+        req.setAppointmentDate("2026-09-02");
+        req.setStartHour("10:30");
+        req.setEndHour("11:30");
+
+        ResponseAppointmentUpdate res = target.update(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testUpdate_NoOverlap() {
+        EntityAppointment existing = new EntityAppointment();
+        existing.setIdAppointment("other-app");
+        existing.setStartHour(Time.valueOf("12:00:00"));
+        existing.setEndHour(Time.valueOf("13:00:00"));
+        when(repositoryAppointment.findByIdUserAndAppointmentDate(anyString(), any()))
+                .thenReturn(List.of(existing));
+
+        RequestAppointmentUpdate req = new RequestAppointmentUpdate();
+        req.setIdAppointment("app-id");
+        req.setAppointmentDate("2026-09-02");
+        req.setStartHour("10:00");
+        req.setEndHour("11:00");
+
+        ResponseAppointmentUpdate res = target.update(req);
+        assertEquals("success", res.getType());
+    }
+
+    @Test
+    void testUpdate_NotificationSuccess() {
+        EntityCustomer customer = new EntityCustomer();
+        customer.setPhone("987654321");
+        customer.setFirstName("Juan");
+        when(repositoryCustomer.findById(anyString())).thenReturn(Optional.of(customer));
+
+        RequestAppointmentUpdate req = new RequestAppointmentUpdate();
+        req.setIdAppointment("app-id");
+        req.setStatus("Confirmada");
+        req.setAppointmentDate("2026-09-02");
+        req.setStartHour("10:00");
+        req.setEndHour("11:00");
+
+        ResponseAppointmentUpdate res = target.update(req);
+        assertEquals("success", res.getType());
+    }
+
+    @Test
+    void testUpdate_NotificationNoPhone() {
+        EntityCustomer customer = new EntityCustomer();
+        when(repositoryCustomer.findById(anyString())).thenReturn(Optional.of(customer));
+
+        RequestAppointmentUpdate req = new RequestAppointmentUpdate();
+        req.setIdAppointment("app-id");
+        req.setStatus("Confirmada");
+        req.setAppointmentDate("2026-09-02");
+        req.setStartHour("10:00");
+        req.setEndHour("11:00");
+
+        ResponseAppointmentUpdate res = target.update(req);
+        assertEquals("success", res.getType());
+    }
+
+    @Test
+    void testUpdate_NotificationCustomerNotFound() {
+        when(repositoryCustomer.findById(anyString())).thenReturn(Optional.empty());
+
+        RequestAppointmentUpdate req = new RequestAppointmentUpdate();
+        req.setIdAppointment("app-id");
+        req.setStatus("Confirmada");
+        req.setAppointmentDate("2026-09-02");
+        req.setStartHour("10:00");
+        req.setEndHour("11:00");
+
+        ResponseAppointmentUpdate res = target.update(req);
+        assertEquals("success", res.getType());
+    }
+
+    @Test
+    void testGetOne_NotFound() {
+        when(repositoryAppointment.findById(anyString())).thenReturn(Optional.empty());
+        ResponseAppointmentGetOne res = target.getone("app-id");
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testGetByBarber() {
+        ResponseAppointmentGetAll res = target.getbybarber("user-id");
         assertEquals("success", res.getType());
     }
 }

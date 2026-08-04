@@ -19,11 +19,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.epiis.apibarbershop.dto.request.RequestCustomerInsert;
 import com.epiis.apibarbershop.dto.request.RequestCustomerUpdate;
+import com.epiis.apibarbershop.dto.response.ResponseCustomerDelete;
 import com.epiis.apibarbershop.dto.response.ResponseCustomerGetAll;
 import com.epiis.apibarbershop.dto.response.ResponseCustomerGetOne;
 import com.epiis.apibarbershop.dto.response.ResponseCustomerInsert;
 import com.epiis.apibarbershop.dto.response.ResponseCustomerUpdate;
 import com.epiis.apibarbershop.entity.EntityCustomer;
+import com.epiis.apibarbershop.entity.EntityUser;
 import com.epiis.apibarbershop.repository.RepositoryCustomer;
 import com.epiis.apibarbershop.repository.RepositoryUser;
 
@@ -109,5 +111,186 @@ class BusinessCustomerTest {
     void testGetOne() {
         ResponseCustomerGetOne res = target.getone("customer-id");
         assertEquals("success", res.getType());
+    }
+
+    @Test
+    void testInsert_SurNameTooShort() {
+        RequestCustomerInsert req = new RequestCustomerInsert();
+        req.setFirstName("First");
+        req.setSurName("La");
+        ResponseCustomerInsert res = target.insert(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testInsert_PhoneEmpty() {
+        RequestCustomerInsert req = new RequestCustomerInsert();
+        req.setFirstName("First");
+        req.setSurName("Last");
+        req.setPhone("");
+        ResponseCustomerInsert res = target.insert(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testInsert_PhoneInvalidFormat() {
+        RequestCustomerInsert req = new RequestCustomerInsert();
+        req.setFirstName("First");
+        req.setSurName("Last");
+        req.setPhone("123");
+        ResponseCustomerInsert res = target.insert(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testInsert_PhoneExists() {
+        EntityCustomer other = new EntityCustomer();
+        other.setIdCustomer("other-id");
+        when(repositoryCustomer.findByPhone(anyString())).thenReturn(Optional.of(other));
+
+        RequestCustomerInsert req = new RequestCustomerInsert();
+        req.setFirstName("First");
+        req.setSurName("Last");
+        req.setPhone("987654321");
+        ResponseCustomerInsert res = target.insert(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testInsert_InvalidEmail() {
+        RequestCustomerInsert req = new RequestCustomerInsert();
+        req.setFirstName("First");
+        req.setSurName("Last");
+        req.setPhone("987654321");
+        req.setEmail("bad-email");
+        ResponseCustomerInsert res = target.insert(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testInsert_EmailExists() {
+        EntityCustomer other = new EntityCustomer();
+        other.setIdCustomer("other-id");
+        when(repositoryCustomer.findByEmail(anyString())).thenReturn(Optional.of(other));
+
+        RequestCustomerInsert req = new RequestCustomerInsert();
+        req.setFirstName("First");
+        req.setSurName("Last");
+        req.setPhone("987654321");
+        req.setEmail("taken@test.com");
+        ResponseCustomerInsert res = target.insert(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testUpdate_NotFound() {
+        when(repositoryCustomer.findById(anyString())).thenReturn(Optional.empty());
+        RequestCustomerUpdate req = new RequestCustomerUpdate();
+        req.setIdCustomer("missing");
+        ResponseCustomerUpdate res = target.update(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testUpdate_PhoneExistsOtherCustomer() {
+        EntityCustomer other = new EntityCustomer();
+        other.setIdCustomer("other-id");
+        when(repositoryCustomer.findByPhone(anyString())).thenReturn(Optional.of(other));
+
+        RequestCustomerUpdate req = new RequestCustomerUpdate();
+        req.setIdCustomer("customer-id");
+        req.setFirstName("First");
+        req.setSurName("Last");
+        req.setPhone("987654321");
+        ResponseCustomerUpdate res = target.update(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testUpdate_PhoneExistsInUsers() {
+        when(repositoryUser.findByPhone(anyString())).thenReturn(Optional.of(new EntityUser()));
+
+        RequestCustomerUpdate req = new RequestCustomerUpdate();
+        req.setIdCustomer("customer-id");
+        req.setFirstName("First");
+        req.setSurName("Last");
+        req.setPhone("987654321");
+        ResponseCustomerUpdate res = target.update(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testUpdate_InvalidEmail() {
+        RequestCustomerUpdate req = new RequestCustomerUpdate();
+        req.setIdCustomer("customer-id");
+        req.setFirstName("First");
+        req.setSurName("Last");
+        req.setPhone("987654321");
+        req.setEmail("bad-email");
+        ResponseCustomerUpdate res = target.update(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testUpdate_EmailExistsOtherCustomer() {
+        EntityCustomer other = new EntityCustomer();
+        other.setIdCustomer("other-id");
+        when(repositoryCustomer.findByEmail(anyString())).thenReturn(Optional.of(other));
+
+        RequestCustomerUpdate req = new RequestCustomerUpdate();
+        req.setIdCustomer("customer-id");
+        req.setFirstName("First");
+        req.setSurName("Last");
+        req.setPhone("987654321");
+        req.setEmail("taken@test.com");
+        ResponseCustomerUpdate res = target.update(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testUpdate_EmailExistsInUsers() {
+        when(repositoryUser.findByEmail(anyString())).thenReturn(Optional.of(new EntityUser()));
+
+        RequestCustomerUpdate req = new RequestCustomerUpdate();
+        req.setIdCustomer("customer-id");
+        req.setFirstName("First");
+        req.setSurName("Last");
+        req.setPhone("987654321");
+        req.setEmail("taken@test.com");
+        ResponseCustomerUpdate res = target.update(req);
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testUpdate_WithStatus() {
+        RequestCustomerUpdate req = new RequestCustomerUpdate();
+        req.setIdCustomer("customer-id");
+        req.setFirstName("First");
+        req.setSurName("Last");
+        req.setEmail("new@test.com");
+        req.setPhone("987654321");
+        req.setStatus(1);
+        ResponseCustomerUpdate res = target.update(req);
+        assertEquals("success", res.getType());
+    }
+
+    @Test
+    void testDelete_Success() {
+        ResponseCustomerDelete res = target.delete("customer-id");
+        assertEquals("success", res.getType());
+    }
+
+    @Test
+    void testDelete_NotFound() {
+        when(repositoryCustomer.findById(anyString())).thenReturn(Optional.empty());
+        ResponseCustomerDelete res = target.delete("missing");
+        assertEquals("error", res.getType());
+    }
+
+    @Test
+    void testGetOne_NotFound() {
+        when(repositoryCustomer.findById(anyString())).thenReturn(Optional.empty());
+        ResponseCustomerGetOne res = target.getone("missing");
+        assertEquals("error", res.getType());
     }
 }

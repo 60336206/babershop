@@ -23,12 +23,14 @@ class TwilioServiceTest {
     }
 
     @Test
-    void testSendConfirmationSms_Exception() {
+    void testSendConfirmationSms_Exception() throws InterruptedException {
         // Will throw an exception because Twilio.init() uses dummy credentials
         try {
             target.sendConfirmationSms("+987654321", "User", "2026-08-01", "10:00");
         } catch (Exception e) {
             // expected
         }
+        // Give the async thread time to run so JaCoCo records its lines
+        Thread.sleep(300);
     }
 }
