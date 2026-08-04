@@ -28,7 +28,7 @@ class WebConfigTest {
         CorsRegistration registration = mock(CorsRegistration.class);
 
         when(registry.addMapping(anyString())).thenReturn(registration);
-        when(registration.allowedOriginPatterns(anyString())).thenReturn(registration);
+        when(registration.allowedOriginPatterns(anyString(), anyString())).thenReturn(registration);
         when(registration.allowedMethods(anyString(), anyString(), anyString(), anyString(), anyString(), anyString())).thenReturn(registration);
         when(registration.allowedHeaders(anyString())).thenReturn(registration);
         when(registration.exposedHeaders(anyString())).thenReturn(registration);
@@ -37,7 +37,7 @@ class WebConfigTest {
         webConfig.addCorsMappings(registry);
 
         verify(registry).addMapping("/**");
-        verify(registration).allowedOriginPatterns("*");
+        verify(registration).allowedOriginPatterns("http://localhost:4200", "http://127.0.0.1:4200");
     }
 
     @Test
