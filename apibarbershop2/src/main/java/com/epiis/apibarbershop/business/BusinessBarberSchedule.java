@@ -16,7 +16,6 @@ import com.epiis.apibarbershop.staticdata.EnumStatus;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.DayOfWeek;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.Locale;
@@ -24,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import com.epiis.apibarbershop.repository.RepositoryAppointment;
 import com.epiis.apibarbershop.entity.EntityAppointment;
-import com.epiis.apibarbershop.generic.ResponseGeneric;
 
 @Service
 public class BusinessBarberSchedule {
@@ -158,7 +156,7 @@ public class BusinessBarberSchedule {
 		ResponseAvailableHours response = new ResponseAvailableHours();
 		try {
 			LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE);
-			String dayName = date.getDayOfWeek().getDisplayName(TextStyle.FULL, new Locale("es", "ES"));
+			String dayName = date.getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.of("es", "ES"));
 			// Capitalize first letter to match "Lunes", "Martes"
 			dayName = dayName.substring(0, 1).toUpperCase() + dayName.substring(1);
 

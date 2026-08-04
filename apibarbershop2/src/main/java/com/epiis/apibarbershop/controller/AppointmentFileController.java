@@ -19,8 +19,6 @@ public class AppointmentFileController {
 		this.businessAppointmentFile = businessAppointmentFile;
 	}
 
-	// POST /appointment/upload-image/{idAppointment}
-	// Sube imagen de referencia del cliente para la reserva
 	@PostMapping(
 		path = "upload-image/{idAppointment}",
 		consumes = MediaType.MULTIPART_FORM_DATA_VALUE

@@ -17,6 +17,7 @@ import com.epiis.apibarbershop.staticdata.EnumStatus;
 
 @Service
 public class BusinessService {
+	private static final String SERVICE_NOT_FOUND = "Servicio no encontrado.";
 	private final RepositoryService repositoryService;
 
 	public BusinessService(RepositoryService repositoryService) {
@@ -57,7 +58,7 @@ public class BusinessService {
 
 		Optional<EntityService> optional = repositoryService.findById(request.getIdService());
 		if (optional.isEmpty()) {
-			response.listMessage.add("Servicio no encontrado.");
+			response.listMessage.add(SERVICE_NOT_FOUND);
 			return response;
 		}
 
@@ -118,7 +119,7 @@ public class BusinessService {
 
 		Optional<EntityService> optional = repositoryService.findById(idService);
 		if (optional.isEmpty()) {
-			response.listMessage.add("Servicio no encontrado.");
+			response.listMessage.add(SERVICE_NOT_FOUND);
 			return response;
 		}
 
@@ -143,7 +144,7 @@ public class BusinessService {
 
 		Optional<EntityService> optional = repositoryService.findById(idService);
 		if (optional.isEmpty()) {
-			response.listMessage.add("Servicio no encontrado.");
+			response.listMessage.add(SERVICE_NOT_FOUND);
 			return response;
 		}
 

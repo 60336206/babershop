@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import com.epiis.apibarbershop.business.BusinessBarberSchedule;
 import com.epiis.apibarbershop.dto.request.*;
 import com.epiis.apibarbershop.dto.response.*;
-import com.epiis.apibarbershop.generic.ResponseGeneric;
 
 @RestController
 @RequestMapping(path = "barberschedule")
