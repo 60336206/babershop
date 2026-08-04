@@ -21,6 +21,8 @@ import { apiusergetall, apiuserinsert, apiuserupdate, apiuserdelete } from '../.
 import { noWhitespaceValidator } from '../../shared/validators/no-whitespace.validator';
 import { apiErrorMessage, isApiSuccess, parseApiResponse } from '../../shared/utils/api-response.util';
 import { STATUS_OPTIONS, getStatusSeverity } from '../../shared/utils/status.util';
+import { notifySuccess, notifyError, notifyWarn } from '../../shared/utils/notify.util';
+import { confirmDelete as confirmDeleteDialog } from '../../shared/utils/confirm-delete.util';
 
 @Component({
   selector: 'app-users',
@@ -106,7 +108,7 @@ export class Users implements OnInit {
       this.cdr.detectChanges();
     }).catch(() => {
       this.loading = false;
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar el listado de usuarios.' });
+      notifyError(this.messageService, 'No se pudo cargar el listado de usuarios.');
     });
   }
 
@@ -148,15 +150,15 @@ export class Users implements OnInit {
       role: user.role,
       status: newStatus
     };
-    
+
     this.api.invoke(apiuserupdate as any, { body }).then((res: any) => {
       const data = parseApiResponse(res);
       if (isApiSuccess(data)) {
         user.status = newStatus;
-        this.messageService.add({ severity: 'success', summary: 'Correcto', detail: 'Estado actualizado.' });
+        notifySuccess(this.messageService, 'Estado actualizado.');
         this.cdr.detectChanges();
       } else {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar el estado.' });
+        notifyError(this.messageService, 'No se pudo actualizar el estado.');
       }
     });
   }
@@ -185,7 +187,7 @@ export class Users implements OnInit {
   saveUser(): void {
     if (!this.frmUser.valid) {
       this.frmUser.markAllAsTouched();
-      this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'Complete todos los campos correctamente.' });
+      notifyWarn(this.messageService, 'Complete todos los campos correctamente.');
       return;
     }
 
@@ -207,15 +209,15 @@ export class Users implements OnInit {
         const data = parseApiResponse(response);
         if (isApiSuccess(data)) {
           this.uploadPhoto(this.frmUser.value.idUser, () => {
-            this.messageService.add({ severity: 'success', summary: 'Correcto', detail: apiErrorMessage(data, 'Usuario actualizado.') });
+            notifySuccess(this.messageService, apiErrorMessage(data, 'Usuario actualizado.'));
             this.dialogVisible = false;
             this.loadUsers();
           });
         } else {
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: apiErrorMessage(data, 'No se pudo actualizar.') });
+          notifyError(this.messageService, apiErrorMessage(data, 'No se pudo actualizar.'));
         }
       }).catch(() => {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al actualizar el usuario.' });
+        notifyError(this.messageService, 'Error al actualizar el usuario.');
       }).finally(() => {
         this.savingUser = false;
         this.cdr.detectChanges();
@@ -236,15 +238,15 @@ export class Users implements OnInit {
         const data = parseApiResponse(response);
         if (isApiSuccess(data)) {
           this.uploadPhoto(data.idUser, () => {
-            this.messageService.add({ severity: 'success', summary: 'Correcto', detail: apiErrorMessage(data, 'Usuario registrado.') });
+            notifySuccess(this.messageService, apiErrorMessage(data, 'Usuario registrado.'));
             this.dialogVisible = false;
             this.loadUsers();
           });
         } else {
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: apiErrorMessage(data, 'No se pudo registrar.') });
+          notifyError(this.messageService, apiErrorMessage(data, 'No se pudo registrar.'));
         }
       }).catch(() => {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al registrar el usuario.' });
+        notifyError(this.messageService, 'Error al registrar el usuario.');
       }).finally(() => {
         this.savingUser = false;
         this.cdr.detectChanges();
@@ -253,15 +255,12 @@ export class Users implements OnInit {
   }
 
   confirmDelete(event: Event, user: any): void {
-    this.confirmationService.confirm({
-      target: event.target as EventTarget,
-      message: `¿Eliminar al usuario "${user.firstName} ${user.surName}"?`,
-      header: 'Confirmar eliminación',
-      icon: 'pi pi-exclamation-triangle',
-      rejectButtonProps: { label: 'Cancelar', severity: 'secondary', outlined: true },
-      acceptButtonProps:  { label: 'Sí, eliminar', severity: 'danger' },
-      accept: () => this.deleteUser(user.idUser)
-    });
+    confirmDeleteDialog(
+      this.confirmationService,
+      event,
+      `¿Eliminar al usuario "${user.firstName} ${user.surName}"?`,
+      () => this.deleteUser(user.idUser)
+    );
   }
 
   private deleteUser(idUser: string): void {
@@ -269,13 +268,13 @@ export class Users implements OnInit {
       const data = parseApiResponse(response);
       if (isApiSuccess(data)) {
         this.listUser = this.listUser.filter(u => u.idUser !== idUser);
-        this.messageService.add({ severity: 'success', summary: 'Correcto', detail: 'Usuario eliminado.' });
+        notifySuccess(this.messageService, 'Usuario eliminado.');
         this.cdr.detectChanges();
       } else {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: apiErrorMessage(data, 'No se pudo eliminar.') });
+        notifyError(this.messageService, apiErrorMessage(data, 'No se pudo eliminar.'));
       }
     }).catch(() => {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al eliminar el usuario.' });
+      notifyError(this.messageService, 'Error al eliminar el usuario.');
     });
   }
 

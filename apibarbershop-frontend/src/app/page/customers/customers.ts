@@ -18,6 +18,8 @@ import { apicustomergetall, apicustomerinsert, ApicustomerinsertParams, apicusto
 import { noWhitespaceValidator } from '../../shared/validators/no-whitespace.validator';
 import { apiErrorMessage, isApiSuccess, parseApiResponse } from '../../shared/utils/api-response.util';
 import { STATUS_OPTIONS, getStatusSeverity } from '../../shared/utils/status.util';
+import { notifySuccess, notifyError, notifyWarn } from '../../shared/utils/notify.util';
+import { confirmDelete as confirmDeleteDialog } from '../../shared/utils/confirm-delete.util';
 
 @Component({
   selector: 'app-customers',
@@ -87,7 +89,7 @@ export class Customers implements OnInit {
       this.cdr.detectChanges();
     }).catch(() => {
       this.loading = false;
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo cargar el listado de clientes.' });
+      notifyError(this.messageService, 'No se pudo cargar el listado de clientes.');
     });
   }
 
@@ -101,15 +103,15 @@ export class Customers implements OnInit {
       email: customer.email,
       status: newStatus
     };
-    
+
     this.api.invoke(apicustomerupdate as any, { body }).then((res: any) => {
       const data = parseApiResponse(res);
       if (isApiSuccess(data)) {
         customer.status = newStatus;
-        this.messageService.add({ severity: 'success', summary: 'Correcto', detail: 'Estado actualizado.' });
+        notifySuccess(this.messageService, 'Estado actualizado.');
         this.cdr.detectChanges();
       } else {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo actualizar el estado.' });
+        notifyError(this.messageService, 'No se pudo actualizar el estado.');
       }
     });
   }
@@ -135,7 +137,7 @@ export class Customers implements OnInit {
   saveCustomer(): void {
     if (!this.frmCustomer.valid) {
       this.frmCustomer.markAllAsTouched();
-      this.messageService.add({ severity: 'warn', summary: 'Atención', detail: 'Complete todos los campos correctamente.' });
+      notifyWarn(this.messageService, 'Complete todos los campos correctamente.');
       return;
     }
 
@@ -154,14 +156,14 @@ export class Customers implements OnInit {
       this.api.invoke(apicustomerupdate, { body }).then((response: any) => {
         const data = parseApiResponse(response);
         if (isApiSuccess(data)) {
-          this.messageService.add({ severity: 'success', summary: 'Correcto', detail: 'Cliente actualizado.' });
+          notifySuccess(this.messageService, 'Cliente actualizado.');
           this.dialogVisible = false;
           this.loadCustomers();
         } else {
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: apiErrorMessage(data, 'Error al actualizar.') });
+          notifyError(this.messageService, apiErrorMessage(data, 'Error al actualizar.'));
         }
       }).catch(() => {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al actualizar el cliente.' });
+        notifyError(this.messageService, 'Error al actualizar el cliente.');
       }).finally(() => { this.saving = false; this.cdr.detectChanges(); });
 
     } else {
@@ -177,41 +179,38 @@ export class Customers implements OnInit {
       this.api.invoke(apicustomerinsert, params).then((response: any) => {
         const data = parseApiResponse(response);
         if (isApiSuccess(data)) {
-          this.messageService.add({ severity: 'success', summary: 'Correcto', detail: 'Cliente registrado.' });
+          notifySuccess(this.messageService, 'Cliente registrado.');
           this.dialogVisible = false;
           this.loadCustomers();
         } else {
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: apiErrorMessage(data, 'Error al registrar.') });
+          notifyError(this.messageService, apiErrorMessage(data, 'Error al registrar.'));
         }
       }).catch(() => {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al registrar el cliente.' });
+        notifyError(this.messageService, 'Error al registrar el cliente.');
       }).finally(() => { this.saving = false; this.cdr.detectChanges(); });
     }
   }
 
   confirmDelete(event: Event, customer: any): void {
-    this.confirmationService.confirm({
-      target: event.target as EventTarget,
-      message: `¿Eliminar al cliente "${customer.firstName} ${customer.surName}"?`,
-      header: 'Confirmar eliminación',
-      icon: 'pi pi-exclamation-triangle',
-      rejectButtonProps: { label: 'Cancelar', severity: 'secondary', outlined: true },
-      acceptButtonProps:  { label: 'Sí, eliminar', severity: 'danger' },
-      accept: () => {
+    confirmDeleteDialog(
+      this.confirmationService,
+      event,
+      `¿Eliminar al cliente "${customer.firstName} ${customer.surName}"?`,
+      () => {
         this.api.invoke(apicustomerdelete, { idCustomer: customer.idCustomer }).then((response: any) => {
           const data = parseApiResponse(response);
           if (isApiSuccess(data)) {
             this.listCustomer = this.listCustomer.filter(c => c.idCustomer !== customer.idCustomer);
-            this.messageService.add({ severity: 'success', summary: 'Correcto', detail: 'Cliente eliminado.' });
+            notifySuccess(this.messageService, 'Cliente eliminado.');
             this.cdr.detectChanges();
           } else {
-            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo eliminar.' });
+            notifyError(this.messageService, 'No se pudo eliminar.');
           }
         }).catch(() => {
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error al eliminar.' });
+          notifyError(this.messageService, 'Error al eliminar.');
         });
       }
-    });
+    );
   }
 
   getStatusSeverity = getStatusSeverity;
