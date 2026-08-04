@@ -24,7 +24,7 @@ public class DatabaseMigrationRunner implements CommandLineRunner {
 			try {
 				jdbcTemplate.execute("ALTER TABLE tuser ADD COLUMN phone VARCHAR(255) NULL");
 				log.info("Columna 'phone' agregada a tuser.");
-			} catch (Exception ex) {
+			} catch (Exception _) {
 				log.info("La columna 'phone' ya existe o no se pudo agregar.");
 			}
 

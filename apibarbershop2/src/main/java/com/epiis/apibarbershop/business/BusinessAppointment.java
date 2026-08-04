@@ -59,46 +59,10 @@ public class BusinessAppointment {
 		Time apptStart = Time.valueOf(startHourStr);
 		Time apptEnd = Time.valueOf(endHourStr);
 
-		// 1. & 2. Validaciones de Fecha (Pasado y Futuro Máximo 365 días)
-		java.time.LocalDate localNow = java.time.LocalDate.now();
-		java.time.LocalDate localAppt = apptDate.toLocalDate();
-		
-		if (localAppt.isBefore(localNow)) {
-			response.listMessage.add("No se pueden reservar citas en el pasado.");
+		if (!isAppointmentDateValid(apptDate, apptStart, response)
+				|| !isWithinBusinessHours(apptStart, apptEnd, response)
+				|| hasOverlappingAppointment(request.getIdUser(), apptDate, apptStart, apptEnd, response)) {
 			return response;
-		}
-		if (localAppt.isAfter(localNow.plusDays(365))) {
-			response.listMessage.add("No se pueden reservar citas con más de 365 días de anticipación.");
-			return response;
-		}
-		if (localAppt.isEqual(localNow)) {
-			java.time.LocalTime localTimeNow = java.time.LocalTime.now();
-			if (apptStart.toLocalTime().isBefore(localTimeNow)) {
-				response.listMessage.add("La hora de la cita ya ha pasado el día de hoy.");
-				return response;
-			}
-		}
-
-		// 3. Validación de Horario Comercial
-		List<EntitySetting> settings = repositorySetting.findAll();
-		if (!settings.isEmpty()) {
-			EntitySetting setting = settings.get(0);
-			if (apptStart.before(setting.getOpenHour()) || apptEnd.after(setting.getCloseHour())) {
-				response.listMessage.add("La cita está fuera del horario de atención del negocio (" + setting.getOpenHour() + " - " + setting.getCloseHour() + ").");
-				return response;
-			}
-		}
-
-		// 4. Anti-Cruce de Citas
-		List<EntityAppointment> existingAppts = repositoryAppointment.findByIdUserAndAppointmentDate(request.getIdUser(), apptDate);
-		for (EntityAppointment existing : existingAppts) {
-			if (!existing.getStatus().equals(EnumAppointmentStatus.CANCELLED.toString())) {
-				// Verifica cruce: (start1 < end2) && (start2 < end1)
-				if (apptStart.before(existing.getEndHour()) && existing.getStartHour().before(apptEnd)) {
-					response.listMessage.add("El barbero ya tiene una cita ocupada en ese horario.");
-					return response;
-				}
-			}
 		}
 
 		EntityAppointment entity = new EntityAppointment();
@@ -136,6 +100,52 @@ public class BusinessAppointment {
 		response.success();
 		response.listMessage.add("Reserva registrada correctamente.");
 		return response;
+	}
+
+	private boolean isAppointmentDateValid(Date appointmentDate, Time startHour, ResponseAppointmentInsert response) {
+		java.time.LocalDate today = java.time.LocalDate.now();
+		java.time.LocalDate scheduledDate = appointmentDate.toLocalDate();
+		if (scheduledDate.isBefore(today)) {
+			response.listMessage.add("No se pueden reservar citas en el pasado.");
+			return false;
+		}
+		if (scheduledDate.isAfter(today.plusDays(365))) {
+			response.listMessage.add("No se pueden reservar citas con más de 365 días de anticipación.");
+			return false;
+		}
+		if (scheduledDate.isEqual(today) && startHour.toLocalTime().isBefore(java.time.LocalTime.now())) {
+			response.listMessage.add("La hora de la cita ya ha pasado el día de hoy.");
+			return false;
+		}
+		return true;
+	}
+
+	private boolean isWithinBusinessHours(Time startHour, Time endHour, ResponseAppointmentInsert response) {
+		List<EntitySetting> settings = repositorySetting.findAll();
+		if (settings.isEmpty()) {
+			return true;
+		}
+
+		EntitySetting setting = settings.get(0);
+		if (startHour.before(setting.getOpenHour()) || endHour.after(setting.getCloseHour())) {
+			response.listMessage.add("La cita está fuera del horario de atención del negocio (" + setting.getOpenHour() + " - " + setting.getCloseHour() + ").");
+			return false;
+		}
+		return true;
+	}
+
+	private boolean hasOverlappingAppointment(String idUser, Date appointmentDate, Time startHour, Time endHour,
+			ResponseAppointmentInsert response) {
+		List<EntityAppointment> existingAppointments = repositoryAppointment.findByIdUserAndAppointmentDate(idUser, appointmentDate);
+		for (EntityAppointment existing : existingAppointments) {
+			boolean isCancelled = EnumAppointmentStatus.CANCELLED.toString().equals(existing.getStatus());
+			boolean overlaps = startHour.before(existing.getEndHour()) && existing.getStartHour().before(endHour);
+			if (!isCancelled && overlaps) {
+				response.listMessage.add("El barbero ya tiene una cita ocupada en ese horario.");
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public ResponseAppointmentUpdate update(RequestAppointmentUpdate request) {
